@@ -17,4 +17,4 @@ cmd = "echo 'Main not implemented yet'"
 cmd = "echo 'Testing not implemented yet'"
 
 [dependencies]
-modular = ">=25.5.0.dev2025061805,<26"
+modular = ">=25.5.0.dev2025062405,<26"
