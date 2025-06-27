@@ -323,6 +323,15 @@ struct ComplexSIMD[type: DType, size: Int](Stringable, Writable, _Expable):
         var exp_re = math.exp(self.re)
         return Self(exp_re * math.cos(self.im), exp_re * math.sin(self.im))
 
+    @always_inline
+    fn conjugate(self) -> Self:
+        """Computes the conjugate of the complex value.
+
+        Returns:
+            The conjugate of the complex value.
+        """
+        return Self(self.re, -self.im)
+
 
 # TODO: we need this overload, because the Absable trait requires returning Self
 # type. We could maybe get rid of this if we had associated types?

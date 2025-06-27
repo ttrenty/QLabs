@@ -230,7 +230,7 @@ struct CustomList[T: Copyable & Movable, hint_trivial_type: Bool = False](
     @always_inline
     fn __eq__[
         U: EqualityComparable & Copyable & Movable, //
-    ](self: List[U, *_], other: List[U, *_]) -> Bool:
+    ](self: CustomList[U, *_], other: CustomList[U, *_]) -> Bool:
         """Checks if two lists are equal.
 
         Parameters:
@@ -263,7 +263,7 @@ struct CustomList[T: Copyable & Movable, hint_trivial_type: Bool = False](
     @always_inline
     fn __ne__[
         U: EqualityComparable & Copyable & Movable, //
-    ](self: List[U, *_], other: List[U, *_]) -> Bool:
+    ](self: CustomList[U, *_], other: CustomList[U, *_]) -> Bool:
         """Checks if two lists are not equal.
 
         Parameters:
@@ -288,7 +288,7 @@ struct CustomList[T: Copyable & Movable, hint_trivial_type: Bool = False](
 
     fn __contains__[
         U: EqualityComparable & Copyable & Movable, //
-    ](self: List[U, *_], value: U) -> Bool:
+    ](self: CustomList[U, *_], value: U) -> Bool:
         """Verify if a given value is present in the list.
 
         Parameters:
@@ -414,7 +414,7 @@ struct CustomList[T: Copyable & Movable, hint_trivial_type: Bool = False](
     @no_inline
     fn __str__[
         U: Representable & Copyable & Movable, //
-    ](self: List[U, *_]) -> String:
+    ](self: CustomList[U, *_]) -> String:
         """Returns a string representation of a `List`.
 
         Parameters:
@@ -446,7 +446,7 @@ struct CustomList[T: Copyable & Movable, hint_trivial_type: Bool = False](
     @no_inline
     fn write_to[
         W: Writer, U: Representable & Copyable & Movable, //
-    ](self: List[U, *_], mut writer: W):
+    ](self: CustomList[U, *_], mut writer: W):
         """Write `my_list.__str__()` to a `Writer`.
 
         Parameters:
@@ -467,7 +467,7 @@ struct CustomList[T: Copyable & Movable, hint_trivial_type: Bool = False](
     @no_inline
     fn __repr__[
         U: Representable & Copyable & Movable, //
-    ](self: List[U, *_]) -> String:
+    ](self: CustomList[U, *_]) -> String:
         """Returns a string representation of a `List`.
 
         Parameters:
@@ -595,7 +595,7 @@ struct CustomList[T: Copyable & Movable, hint_trivial_type: Bool = False](
             earlier_idx -= 1
             later_idx -= 1
 
-    fn extend(mut self, owned other: List[T, *_]):
+    fn extend(mut self, owned other: CustomList[T, *_]):
         """Extends this list by consuming the elements of `other`.
 
         Args:
@@ -631,7 +631,7 @@ struct CustomList[T: Copyable & Movable, hint_trivial_type: Bool = False](
 
     fn extend[
         D: DType, //
-    ](mut self: List[Scalar[D], *_, **_], value: SIMD[D, _]):
+    ](mut self: CustomList[Scalar[D], *_, **_], value: SIMD[D, _]):
         """Extends this list with the elements of a vector.
 
         Parameters:
@@ -649,7 +649,12 @@ struct CustomList[T: Copyable & Movable, hint_trivial_type: Bool = False](
 
     fn extend[
         D: DType, //
-    ](mut self: List[Scalar[D], *_, **_], value: SIMD[D, _], *, count: Int):
+    ](
+        mut self: CustomList[Scalar[D], *_, **_],
+        value: SIMD[D, _],
+        *,
+        count: Int,
+    ):
         """Extends this list with `count` number of elements from a vector.
 
         Parameters:
@@ -671,7 +676,7 @@ struct CustomList[T: Copyable & Movable, hint_trivial_type: Bool = False](
 
     fn extend[
         D: DType, //
-    ](mut self: List[Scalar[D], *_, **_], value: Span[Scalar[D]]):
+    ](mut self: CustomList[Scalar[D], *_, **_], value: Span[Scalar[D]]):
         """Extends this list with the elements of a `Span`.
 
         Parameters:
@@ -809,7 +814,7 @@ struct CustomList[T: Copyable & Movable, hint_trivial_type: Bool = False](
     fn index[
         C: EqualityComparable & Copyable & Movable, //
     ](
-        ref self: List[C, *_],
+        ref self: CustomList[C, *_],
         value: C,
         start: Int = 0,
         stop: Optional[Int] = None,
@@ -865,7 +870,9 @@ struct CustomList[T: Copyable & Movable, hint_trivial_type: Bool = False](
 
     fn _binary_search_index[
         dtype: DType, //,
-    ](self: List[Scalar[dtype], **_], needle: Scalar[dtype]) -> Optional[UInt]:
+    ](self: CustomList[Scalar[dtype], **_], needle: Scalar[dtype]) -> Optional[
+        UInt
+    ]:
         """Finds the index of `needle` with binary search.
 
         Args:
@@ -1017,7 +1024,7 @@ struct CustomList[T: Copyable & Movable, hint_trivial_type: Bool = False](
 
     fn count[
         T: EqualityComparable & Copyable & Movable, //
-    ](self: List[T, *_], value: T) -> Int:
+    ](self: CustomList[T, *_], value: T) -> Int:
         """Counts the number of occurrences of a value in the list.
 
         Parameters:
@@ -1120,8 +1127,8 @@ struct CustomList[T: Copyable & Movable, hint_trivial_type: Bool = False](
 
     fn _cast_hint_trivial_type[
         hint_trivial_type: Bool
-    ](owned self) -> List[T, hint_trivial_type]:
-        var result = List[T, hint_trivial_type]()
+    ](owned self) -> CustomList[T, hint_trivial_type]:
+        var result = CustomList[T, hint_trivial_type]()
         result.data = self.data
         result._len = self._len
         result.capacity = self.capacity

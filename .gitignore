@@ -4,4 +4,9 @@
 *.egg-info
 
 # Binary files
+build/
+build/*
 main
+*.mojopkg
+
+debug.mojo
