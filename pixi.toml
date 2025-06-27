@@ -4,17 +4,75 @@ name = "qlabs"
 platforms = ["linux-64"]
 version = "0.1.0"
 
-[tasks.lint]
-cmd = "echo 'Linting not implemented yet'"
 
-[tasks.package]
-cmd = "echo 'Packaging not implemented yet'"
+[tasks.clear] # Clear the terminal
+cmd = "clear"
+
+[tasks.lint] # Check code formatting using an external script
+cmd = ".github/scripts/check-format.sh"
+
+[tasks.format] # Format the code
+cmd = "pixi run mojo format ./src ./tests"
+inputs = ["./src/**/*.mojo", "./tests/**/*.mojo"]
+
+[tasks.create_build_dir]
+cmd = "mkdir -p build/"
+
+[tasks.build] # Compile any mojo file
+args = [
+    { "arg" = "full_file_path", "default" = "main" },
+    { "arg" = "executable_name", "default" = "main" },
+]
+inputs = ["{{ full_file_path }}"]
+outputs = ["build/{{ executable_name }}"]
+cmd = "pixi run mojo build {{ full_file_path }} -o {{ executable_name }} && cp {{ executable_name }} build/{{ executable_name }} && rm {{ executable_name }}"
+depends-on = ["create_build_dir"]
+
+[tasks.package] # Compile the package
+cmd = "mkdir -p build/ && pixi run mojo package src -o qlabs.mojopkg && cp qlabs.mojopkg build/ && rm qlabs.mojopkg"
+inputs = ["./src/**/*.mojo"]
+outputs = ["build/qlabs.mojopkg"]
+depends-on = ["create_build_dir", "format"]
+
+[tasks.clean] # Clean the package files and Build directory
+cmd = "rm build/* && rmdir build/ && rm examples/qlabs.mojopkg && rm tests/qlabs.mojopkg"
+
+[tasks.install] # Install the package in the necessary directories
+cmd = "cp build/qlabs.mojopkg examples/qlabs.mojopkg && cp build/qlabs.mojopkg tests/qlabs.mojopkg"
+inputs = ["build/qlabs.mojopkg"]
+outputs = ["examples/qlabs.mojopkg", "tests/qlabs.mojopkg"]
+depends-on = ["package"]
 
 [tasks.main]
-cmd = "echo 'Main not implemented yet'"
+cmd = "./build/main"
+depends-on = [
+    "install",
+    { "task" = "build", "args" = [
+        "examples/main.mojo",
+        "main",
+    ] },
+]
 
-[tasks.test]
-cmd = "echo 'Testing not implemented yet'"
+[tasks.test] # Unitary Tests (uses the mojo testing tool)
+cmd = "pixi run mojo test tests"
+depends-on = ["install"]
+
+# # Benches
+# bench_decimal = "clear && pixi run package && cd benches/decimal && pixi run mojo -I ../ bench.mojo && cd ../.. && pixi run clean"
+# bench_bigint = "clear && pixi run package && cd benches/bigint && pixi run mojo -I ../ bench.mojo && cd ../.. && pixi run clean"
+# bench_biguint = "clear && pixi run package && cd benches/biguint && pixi run mojo -I ../ bench.mojo && cd ../.. && pixi run clean"
+# bench_bigdecimal = "clear && pixi run package && cd benches/bigdecimal && pixi run mojo -I ../ bench.mojo && cd ../.. && pixi run clean"
+# bench_dec = "pixi run bench_decimal"
+# bench_bint = "pixi run bench_bigint"
+# bench_buint = "pixi run bench_biguint"
+# bench_bdec = "pixi run bench_bigdecimal"
+
+
+[tasks]
+
+p = [{ task = "clear" }, { task = "package" }]
+m = [{ task = "clear" }, { task = "main" }]
+# t = "clear && pixi run package && pixi run mojo test tests --filter"
 
 [dependencies]
-modular = ">=25.5.0.dev2025061805,<26"
+modular = ">=25.5.0.dev2025062405,<26"
