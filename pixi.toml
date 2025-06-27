@@ -53,10 +53,9 @@ depends-on = [
     ] },
 ]
 
-# [tasks.test]
-# # Tests (uses the mojo testing tool)
-# # test = "pixi run package && pixi run mojo test tests --filter" 
-# test = { cmd = ["pixi run mojo test tests --filter"], depends-on = ["package"] }
+[tasks.test] # Unitary Tests (uses the mojo testing tool)
+cmd = "pixi run mojo test tests"
+depends-on = ["install"]
 
 # # Benches
 # bench_decimal = "clear && pixi run package && cd benches/decimal && pixi run mojo -I ../ bench.mojo && cd ../.. && pixi run clean"
