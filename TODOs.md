@@ -4,19 +4,15 @@ A pure state is represented by a ket vector, e.g., $ |\psi\rangle = \alpha|0\ran
 
 ## Ordered by Priority (5 ↑) / Difficulty (5 ↓)
 
-- 5 / 2 : Reimplement Fig 2 circuit using Swap efficient gates representation
-    - Generarly when doing an implementation of a abstract circuit also do the implementation
-    using the functions for people to understand more easily what's happening
-
 - 5 / 1 : density matrix calculcation from state vectors
 
-- 5 / 5 : Extend qubitWiseMultiply() to 2 qubits gates 
-
-- 5 / 5 : Extend qubitWiseMultiply() to multiple qubits gates
+- 5 / 5 : Extend qubitWiseMultiply() to 2 and multiple qubits gates (Test it)
 
 - 4 / 3 : Implement measurement gates
 
  - 4 / 5 : Implement the computation of statistics: (6.5 and 6.6)
+
+- 3 / 2 :  Use a separate list for things that are not real gate to not slow down the main run logic
 
 - 3 / 2 :  Use a separate list for things that are not real gate to not slow down the main run logic
 
