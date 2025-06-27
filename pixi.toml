@@ -4,7 +4,17 @@ name = "qlabs"
 platforms = ["linux-64"]
 version = "0.1.0"
 
-[tasks]
+[tasks.lint]
+cmd = "echo 'Linting not implemented yet'"
+
+[tasks.package]
+cmd = "echo 'Packaging not implemented yet'"
+
+[tasks.main]
+cmd = "echo 'Main not implemented yet'"
+
+[tasks.test]
+cmd = "echo 'Testing not implemented yet'"
 
 [dependencies]
 modular = ">=25.5.0.dev2025061805,<26"
