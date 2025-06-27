@@ -13,17 +13,17 @@ cmd = ".github/scripts/check-format.sh"
 
 [tasks.format] # Format the code
 cmd = "pixi run mojo format ./src ./tests"
-inputs = ["./src/**/*.mojo", "./tests/**/*.mojo"]
+inputs = ["./examples/**/*.mojo", "./src/**/*.mojo", "./tests/**/*.mojo"]
 
 [tasks.create_build_dir]
 cmd = "mkdir -p build/"
 
 [tasks.build] # Compile any mojo file
 args = [
-    { "arg" = "full_file_path", "default" = "main" },
+    { "arg" = "full_file_path", "default" = "examples/main.mojo" },
     { "arg" = "executable_name", "default" = "main" },
 ]
-inputs = ["{{ full_file_path }}"]
+inputs = ["{{ full_file_path }}", "./src/**/*.mojo"]
 outputs = ["build/{{ executable_name }}"]
 cmd = "pixi run mojo build {{ full_file_path }} -o {{ executable_name }} && cp {{ executable_name }} build/{{ executable_name }} && rm {{ executable_name }}"
 depends-on = ["create_build_dir"]
@@ -70,6 +70,7 @@ depends-on = ["install"]
 
 [tasks]
 
+tests = [{ task = "test" }]
 p = [{ task = "clear" }, { task = "package" }]
 m = [{ task = "clear" }, { task = "main" }]
 # t = "clear && pixi run package && pixi run mojo test tests --filter"

@@ -380,6 +380,47 @@ fn presentation() -> None:
     print("Final quantum state:\n", final_state)
 
 
+fn test_density_matrix() -> None:
+    """
+    Returns the density matrix of the given quantum state.
+    If qubits is empty, returns the full density matrix.
+    """
+    num_qubits: Int = 2
+    qc: GateCircuit = GateCircuit(num_qubits)
+
+    qc.apply_gates(
+        Hadamard(0),
+        Hadamard(1, controls=[0]),
+        Z(0),
+        X(1),
+    )
+
+    print("Quantum circuit created:\n", qc)
+
+    qsimu = StateVectorSimulator(
+        qc,
+        initial_state=PureBasisState.from_bitstring("00"),
+        optimisation_level=0,  # No optimisations for now
+        verbose=True,
+        verbose_step_size=ShowAfterEachGate,  # ShowAfterEachGate, ShowOnlyEnd
+    )
+    final_state = qsimu.run()
+    print("Final quantum state:\n", final_state)
+
+    matrix = final_state.to_density_matrix()
+    print("Density matrix:\n", matrix)
+    other_matrix = partial_trace(final_state, [])  # Empty list means full trace
+    print("Partial trace matrix:\n", other_matrix)
+    other_matrix_0 = partial_trace(
+        final_state, [0]
+    )  # Empty list means full trace
+    print("Partial trace matrix qubit 0:\n", other_matrix_0)
+    other_matrix_1 = partial_trace(
+        final_state, [1]
+    )  # Empty list means full trace
+    print("Partial trace matrix qubit 1:\n", other_matrix_1)
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # MARK:         Tests                #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -427,8 +468,8 @@ fn presentation() -> None:
 
 def main():
     args = argv()
-    number_qubits: Int = 15
-    number_layers: Int = 10
+    number_qubits: Int = 10
+    number_layers: Int = 20
     if len(args) == 3:
         try:
             number_qubits = Int(args[1])
@@ -441,14 +482,16 @@ def main():
     else:
         print("Usage: ./main [number_of_qubits] [number_of_layers]")
 
-    simulate_figure1_circuit()
+    # simulate_figure1_circuit()
 
-    # simulate_figure1_circuit_abstract()
+    simulate_figure1_circuit_abstract()
 
-    # simulate_random_circuit(number_qubits, number_layers)
+    simulate_random_circuit(number_qubits, number_layers)
 
     # simulate_figure4_circuit()
 
     # simulate_figure4_circuit_abstract()
 
     # presentation()
+
+    # test_density_matrix()

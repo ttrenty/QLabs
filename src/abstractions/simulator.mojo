@@ -211,15 +211,8 @@ struct StateVectorSimulator(Copyable, Movable):
         i: Int = 0
         layer_index: Int = 0
         for gate in self.circuit.gates:  # Iterate over the gates in the circuit
-            if gate.symbol not in [_SEPARATOR.symbol, SWAP.symbol]:
-                # Apply the next gate
-                quantum_state = qubit_wise_multiply_extended(
-                    len(gate.target_qubits),  # Number of target qubits
-                    gate.matrix,
-                    gate.target_qubits,  # Assuming single target qubit
-                    quantum_state,
-                    gate.control_qubits_with_flags,
-                )
+            if gate.symbol == _SEPARATOR.symbol:
+                continue
             elif gate.symbol == SWAP.symbol:
                 if len(gate.target_qubits) != 2:
                     print("Error: SWAP gate must have exactly 2 target qubits.")
@@ -231,11 +224,15 @@ struct StateVectorSimulator(Copyable, Movable):
                     quantum_state,
                     gate.control_qubits_with_flags,
                 )
-            elif gate.symbol == _SEPARATOR.symbol:
-                continue
             else:
-                print("Error: Unexpected gate symbol:", gate.symbol)
-                continue  # Skip unexpected symbols
+                # Apply the next gate
+                quantum_state = qubit_wise_multiply_extended(
+                    len(gate.target_qubits),  # Number of target qubits
+                    gate.matrix,
+                    gate.target_qubits,  # Assuming single target qubit
+                    quantum_state,
+                    gate.control_qubits_with_flags,
+                )
 
             i += 1
             if self.verbose:
