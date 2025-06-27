@@ -1,0 +1,36 @@
+# .github/workflows/ci.yml
+name: Main CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@v0.8.10
+        with:
+          pixi-version: latest
+          cache: true
+          cache-key: ${{ runner.os }}-pixi-v1-${{ hashFiles('**/pixi.lock') }}
+
+      - name: Check formatting
+        run: pixi run lint
+
+      - name: Build package
+        run: pixi run package
+
+      - name: Run main example file
+        run: pixi run main
+
+      - name: Run tests
+        run: pixi run test
+

@@ -3,7 +3,5 @@
 .pixi
 *.egg-info
 
-.github
-
 # Binary files
 main
