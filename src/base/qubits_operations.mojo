@@ -587,40 +587,48 @@ fn partial_trace[
     n = quantum_state.number_qubits()
     conj_quantum_state = quantum_state.conjugate()
 
-    is_traced_out: List[Bool] = [False] * n
-    for i in range(len(qubits_to_trace_out)):
-        is_traced_out[qubits_to_trace_out[i]] = True
-
-    qubits_to_keep: List[Int] = []
-    for i in range(n):
-        if not is_traced_out[i]:
-            qubits_to_keep.append(i)
-
     # is_traced_out: List[Bool] = [False] * n
+    # for i in range(len(qubits_to_trace_out)):
+    #     is_traced_out[qubits_to_trace_out[i]] = True
+
     # qubits_to_keep: List[Int] = []
-
-    # current_index: Int = 0
-    # current_traced_index: Int = 0
-    # for _ in range(n):
-    #     if qubits_to_trace_out[current_traced_index] == current_index:
-    #         is_traced_out[current_index] = True
-    #         current_traced_index += 1
-    #         if current_traced_index >= len(qubits_to_trace_out):
-    #             break
-    #     else:
+    # for i in range(n):
+    #     if not is_traced_out[i]:
     #         qubits_to_keep.append(i)
-    #     current_index += 1
 
-    # # Ensure all qubits have been added to qubits_to_keep
-    # for i in range(current_index, n):
-    #     qubits_to_keep.append(i)
+    is_traced_out: List[Bool] = [False] * n
+    qubits_to_keep: List[Int] = []
+
+    current_index: Int = 0
+    current_traced_index: Int = 0
+    for _ in range(n):
+        if current_traced_index >= len(qubits_to_trace_out):
+            break
+        if qubits_to_trace_out[current_traced_index] == current_index:
+            is_traced_out[current_index] = True
+            current_traced_index += 1
+            current_index += 1
+            if current_traced_index >= len(qubits_to_trace_out):
+                break
+        else:
+            qubits_to_keep.append(current_index)
+            current_index += 1
+
+    # Ensure all qubits have been added to qubits_to_keep
+    for i in range(current_index, n):
+        qubits_to_keep.append(i)
 
     num_qubits_to_trace_out: Int = len(qubits_to_trace_out)
     num_qubits_to_keep: Int = len(qubits_to_keep)
     if num_qubits_to_trace_out + num_qubits_to_keep != n:
         print(
-            "Error: The total number of qubits to trace out and keep does not"
-            " match the total number of qubits."
+            "Error: The total number of qubits to trace out (",
+            num_qubits_to_trace_out,
+            ") and keep (",
+            num_qubits_to_keep,
+            ") does not match the total number of qubits (",
+            n,
+            ").",
         )
         return ComplexMatrix(0, 0)  # Return an empty matrix
 

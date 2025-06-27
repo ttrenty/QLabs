@@ -112,7 +112,8 @@ struct GateCircuit(Movable, Stringable, Writable):
                 controls_flags: List[List[Int]] = gate.control_qubits_with_flags
 
                 for control in controls_flags:
-                    control_index, flag = control[0], control[1]
+                    # control_index, flag = control[0], control[1]
+                    control_index = control[0]
                     while (
                         wires_current_gate[qubit_index]
                         < wires_current_gate[control_index]

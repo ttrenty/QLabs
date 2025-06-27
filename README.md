@@ -28,8 +28,8 @@ curl -sSf https://pixi.sh/install.sh | bash
 # Install all project dependencies:
 pixi install
 
-# Build and run the simulator:
-pixi run mojo build src/main.mojo && ./main
+# Build and run examples of the simulator:
+pixi run main
 ```
 
 

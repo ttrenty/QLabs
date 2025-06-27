@@ -36,7 +36,7 @@ struct PureBasisState(Copyable, Movable, Stringable, Writable):
         self.state_vector = CustomList[ComplexFloat64, hint_trivial_type=True](
             length=size, fill=ComplexFloat64(0.0, 0.0)
         )
-        self.state_vector.memset_zero()  # Initialize the state vector with zeros
+        # self.state_vector.memset_zero()
 
     @always_inline
     fn __getitem__(self, index: Int) -> ComplexFloat64:
@@ -64,9 +64,11 @@ struct PureBasisState(Copyable, Movable, Stringable, Writable):
             if amplitude_im == 0.0 and amplitude_re == 0.0:
                 amplitude_str: String = String(Int(amplitude_re))
             elif amplitude_im == 0.0:
-                amplitude_str = String(round(amplitude_re, 2))
+                # amplitude_str = String(round(amplitude_re, 2))
+                amplitude_str = String(amplitude_re)
             elif amplitude_re == 0.0:
-                amplitude_str = String(round(amplitude_im, 2)) + "i"
+                # amplitude_str = String(round(amplitude_im, 2)) + "i"
+                amplitude_str = String(amplitude_im) + "i"
             else:
                 amplitude_str = (
                     String(round(amplitude_re, 2))
@@ -179,7 +181,7 @@ struct PureBasisState(Copyable, Movable, Stringable, Writable):
             conjugated_state.state_vector[i] = self.state_vector[i].conjugate()
         return conjugated_state
 
-    fn get_density_matrix(self) -> ComplexMatrix:
+    fn to_density_matrix(self) -> ComplexMatrix:
         """Returns the density matrix of the pure state.
 
         The density matrix is computed as the outer product of the state vector with itself.
