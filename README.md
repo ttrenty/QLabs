@@ -33,15 +33,11 @@ pixi run main
 ```
 
 
-## 🔥 Current Implementation(s)
+## 🔥 Current Implementation
 
-The current implemtnation uses State Vector which is an efficient method for simulating
-with high precision smaller scale qubits system of 20-30 qubits. It also allow for 
-easily accessible gradient computations.
+The current implementation uses a State Vector approach, which is an efficient method for simulating small-scale quantum circuits (20–30 qubits) with high precision. This approach also enables relatively straightforward exact gradient computations.
 
-Another possible implemenation would be using Tensor Network, this method is effective 
-for large circuits, however with less precision in the calculations and with more
-expensive gradients computations.
+An alternative implementation for the futur could be using the Tensor Network approach. This method is more suitable for larger circuits but offers lower precision and would involves more computationally expensive gradient calculations.
 
 ## 📄 License
 
