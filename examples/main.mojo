@@ -5,8 +5,8 @@
 from sys import argv
 import random
 
-# from complex import ComplexFloat64
-from qlabs.local_stdlib.complex import ComplexFloat64
+# from complex import ComplexFloat32
+from qlabs.local_stdlib.complex import ComplexFloat32
 from qlabs.local_stdlib import CustomList
 
 from qlabs.base import (
@@ -38,7 +38,7 @@ from qlabs.abstractions import (
     ShowOnlyEnd,
 )
 
-from gpu_examples import gpu_debug_something
+from gpu_examples import gpu_debug_something, run_gpu_not_abstract
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # MARK:         Examples             #
@@ -568,7 +568,7 @@ def main():
     else:
         print("Usage: ./main [number_of_qubits] [number_of_layers]")
 
-    # simulate_figure1_circuit()
+    simulate_figure1_circuit()
 
     # simulate_figure1_circuit_abstract()
 
@@ -587,3 +587,5 @@ def main():
     # debug_something()
 
     gpu_debug_something()
+
+    run_gpu_not_abstract()

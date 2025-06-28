@@ -2,8 +2,10 @@
 # MARK:         Imports              #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
+from math import sqrt
+
 from ..local_stdlib import CustomList
-from ..local_stdlib.complex import ComplexFloat64
+from ..local_stdlib.complex import ComplexFloat32
 
 from .state_and_matrix import (
     ComplexMatrix,
@@ -17,9 +19,9 @@ from .state_and_matrix import (
 alias Identity = Gate(
     size=2,
     matrix=ComplexMatrix(
-        List[List[ComplexFloat64]](
-            [ComplexFloat64(1, 0), ComplexFloat64(0, 0)],
-            [ComplexFloat64(0, 0), ComplexFloat64(1, 0)],
+        List[List[ComplexFloat32]](
+            [ComplexFloat32(1, 0), ComplexFloat32(0, 0)],
+            [ComplexFloat32(0, 0), ComplexFloat32(1, 0)],
         )
     ),
     symbol="I",
@@ -28,9 +30,15 @@ alias Identity = Gate(
 alias Hadamard = Gate(
     size=2,
     matrix=ComplexMatrix(
-        List[List[ComplexFloat64]](
-            [ComplexFloat64(1 / 2**0.5, 0), ComplexFloat64(1 / 2**0.5, 0)],
-            [ComplexFloat64(1 / 2**0.5, 0), ComplexFloat64(-1 / 2**0.5, 0)],
+        List[List[ComplexFloat32]](
+            [
+                ComplexFloat32(1.0 / Float32(sqrt(2.0)), 0),
+                ComplexFloat32(1 / Float32(sqrt(2.0)), 0),
+            ],
+            [
+                ComplexFloat32(1 / Float32(sqrt(2.0)), 0),
+                ComplexFloat32(-1 / Float32(sqrt(2.0)), 0),
+            ],
         )
     ),
     symbol="H",
@@ -39,9 +47,9 @@ alias Hadamard = Gate(
 alias PauliX = Gate(
     size=2,
     matrix=ComplexMatrix(
-        List[List[ComplexFloat64]](
-            [ComplexFloat64(0, 0), ComplexFloat64(1, 0)],
-            [ComplexFloat64(1, 0), ComplexFloat64(0, 0)],
+        List[List[ComplexFloat32]](
+            [ComplexFloat32(0, 0), ComplexFloat32(1, 0)],
+            [ComplexFloat32(1, 0), ComplexFloat32(0, 0)],
         )
     ),
     symbol="X",
@@ -50,9 +58,9 @@ alias PauliX = Gate(
 alias PauliZ = Gate(
     size=2,
     matrix=ComplexMatrix(
-        List[List[ComplexFloat64]](
-            [ComplexFloat64(1, 0), ComplexFloat64(0, 0)],
-            [ComplexFloat64(0, 0), ComplexFloat64(-1, 0)],
+        List[List[ComplexFloat32]](
+            [ComplexFloat32(1, 0), ComplexFloat32(0, 0)],
+            [ComplexFloat32(0, 0), ComplexFloat32(-1, 0)],
         )
     ),
     symbol="Z",
@@ -61,9 +69,9 @@ alias PauliZ = Gate(
 alias PauliY = Gate(
     size=2,
     matrix=ComplexMatrix(
-        List[List[ComplexFloat64]](
-            [ComplexFloat64(0, 0), ComplexFloat64(0, -1)],
-            [ComplexFloat64(0, 1), ComplexFloat64(0, 0)],
+        List[List[ComplexFloat32]](
+            [ComplexFloat32(0, 0), ComplexFloat32(0, -1)],
+            [ComplexFloat32(0, 1), ComplexFloat32(0, 0)],
         )
     ),
     symbol="Y",
@@ -72,9 +80,9 @@ alias PauliY = Gate(
 alias _SEPARATOR = Gate(
     size=2,
     matrix=ComplexMatrix(
-        List[List[ComplexFloat64]](
-            [ComplexFloat64(0, 0), ComplexFloat64(0, -1)],
-            [ComplexFloat64(0, 1), ComplexFloat64(0, 0)],
+        List[List[ComplexFloat32]](
+            [ComplexFloat32(0, 0), ComplexFloat32(0, -1)],
+            [ComplexFloat32(0, 1), ComplexFloat32(0, 0)],
         )
     ),
     symbol="_SEPARATOR",
@@ -83,9 +91,9 @@ alias _SEPARATOR = Gate(
 alias _START = Gate(
     size=2,
     matrix=ComplexMatrix(
-        List[List[ComplexFloat64]](
-            [ComplexFloat64(0, 0), ComplexFloat64(0, -1)],
-            [ComplexFloat64(0, 1), ComplexFloat64(0, 0)],
+        List[List[ComplexFloat32]](
+            [ComplexFloat32(0, 0), ComplexFloat32(0, -1)],
+            [ComplexFloat32(0, 1), ComplexFloat32(0, 0)],
         )
     ),
     symbol="_START",
@@ -94,9 +102,9 @@ alias _START = Gate(
 alias SWAP = Gate(
     size=2,
     matrix=ComplexMatrix(
-        List[List[ComplexFloat64]](
-            [ComplexFloat64(0, 0), ComplexFloat64(0, -1)],
-            [ComplexFloat64(0, 1), ComplexFloat64(0, 0)],
+        List[List[ComplexFloat32]](
+            [ComplexFloat32(0, 0), ComplexFloat32(0, -1)],
+            [ComplexFloat32(0, 1), ComplexFloat32(0, 0)],
         )
     ),
     symbol="SWAP",
@@ -105,30 +113,30 @@ alias SWAP = Gate(
 alias iSWAP = Gate(
     size=4,
     matrix=ComplexMatrix(
-        List[List[ComplexFloat64]](
+        List[List[ComplexFloat32]](
             [
-                ComplexFloat64(1, 0),
-                ComplexFloat64(0, 0),
-                ComplexFloat64(0, 0),
-                ComplexFloat64(0, 0),
+                ComplexFloat32(1, 0),
+                ComplexFloat32(0, 0),
+                ComplexFloat32(0, 0),
+                ComplexFloat32(0, 0),
             ],
             [
-                ComplexFloat64(0, 0),
-                ComplexFloat64(0, 0),
-                ComplexFloat64(0, 1),
-                ComplexFloat64(0, 0),
+                ComplexFloat32(0, 0),
+                ComplexFloat32(0, 0),
+                ComplexFloat32(0, 1),
+                ComplexFloat32(0, 0),
             ],
             [
-                ComplexFloat64(0, 0),
-                ComplexFloat64(0, 1),
-                ComplexFloat64(0, 0),
-                ComplexFloat64(0, 0),
+                ComplexFloat32(0, 0),
+                ComplexFloat32(0, 1),
+                ComplexFloat32(0, 0),
+                ComplexFloat32(0, 0),
             ],
             [
-                ComplexFloat64(0, 0),
-                ComplexFloat64(0, 0),
-                ComplexFloat64(0, 0),
-                ComplexFloat64(1, 0),
+                ComplexFloat32(0, 0),
+                ComplexFloat32(0, 0),
+                ComplexFloat32(0, 0),
+                ComplexFloat32(1, 0),
             ],
         )
     ),
@@ -252,7 +260,7 @@ struct Gate(Copyable, Movable, Representable, Stringable, Writable):
         )
 
     @always_inline
-    fn __getitem__(self, row: Int, col: Int) -> ComplexFloat64:
+    fn __getitem__(self, row: Int, col: Int) -> ComplexFloat32:
         return self.matrix[row, col]
 
     fn __str__(self) -> String:

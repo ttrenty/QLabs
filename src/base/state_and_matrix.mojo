@@ -5,9 +5,17 @@
 from collections.linked_list import LinkedList
 
 from ..local_stdlib import CustomList
-from ..local_stdlib.complex import ComplexFloat64
+from ..local_stdlib.complex import ComplexFloat32
 
 from .qubits_operations import partial_trace
+
+# GPU imports
+
+from layout import Layout, LayoutTensor
+
+alias dtype = DType.float32
+alias STATE_VECTOR_SIZE = 8
+alias state_vector_3qubits_layout = Layout.row_major(STATE_VECTOR_SIZE, 1)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -27,7 +35,7 @@ struct StateVector(Copyable, Movable, Stringable, Writable):
 
     var num_qubits: Int
     """The number of qubits in the state, which determines the size of the state vector."""
-    var state_vector: CustomList[ComplexFloat64, hint_trivial_type=True]
+    var state_vector: CustomList[ComplexFloat32, hint_trivial_type=True]
     """The state vector representing the amplitudes of the basis states."""
 
     fn __init__(out self, size: Int):
@@ -37,23 +45,23 @@ struct StateVector(Copyable, Movable, Stringable, Writable):
             size: The size of the vector, which is 2^n for n qubits.
         """
         self.num_qubits = 0
-        self.state_vector = CustomList[ComplexFloat64, hint_trivial_type=True](
-            length=size, fill=ComplexFloat64(0.0, 0.0)
+        self.state_vector = CustomList[ComplexFloat32, hint_trivial_type=True](
+            length=size, fill=ComplexFloat32(0.0, 0.0)
         )
         # self.state_vector.memset_zero()
 
     @always_inline
-    fn __getitem__(self, index: Int) -> ComplexFloat64:
+    fn __getitem__(self, index: Int) -> ComplexFloat32:
         # @parameter
         # if check_bounds:
         #     if index < 0 or index >= self.size():
         #         print("ERROR: Index", index, "is out of bounds for state vector of size", self.size())
-        #         return ComplexFloat64(0.0, 0.0)
+        #         return ComplexFloat32(0.0, 0.0)
         # else:
         return self.state_vector[index]
 
     @always_inline
-    fn __setitem__(mut self, index: Int, value: ComplexFloat64) -> None:
+    fn __setitem__(mut self, index: Int, value: ComplexFloat32) -> None:
         self.state_vector[index] = value
 
     fn __str__(self) -> String:
@@ -63,8 +71,8 @@ struct StateVector(Copyable, Movable, Stringable, Writable):
         for i in range(self.size()):
             amplitude = self.state_vector[i]
             # amplitude_str: String = String(amplitude)
-            amplitude_re: Float64 = amplitude.re
-            amplitude_im: Float64 = amplitude.im
+            amplitude_re: Float32 = amplitude.re
+            amplitude_im: Float32 = amplitude.im
             if amplitude_im == 0.0 and amplitude_re == 0.0:
                 amplitude_str: String = String(Int(amplitude_re))
             elif amplitude_im == 0.0:
@@ -108,12 +116,8 @@ struct StateVector(Copyable, Movable, Stringable, Writable):
         """
         num_qubits: Int = len(bitstring)
 
-        # state_vector: List[ComplexFloat64] = [ComplexFloat64(0.0, 0.0)] * (
-        #     1 << num_qubits
-        # )  # 2^num_qubits
-
-        state_vector = CustomList[ComplexFloat64, hint_trivial_type=True](
-            length=1 << num_qubits, fill=ComplexFloat64(0.0, 0.0)
+        state_vector = CustomList[ComplexFloat32, hint_trivial_type=True](
+            length=1 << num_qubits, fill=ComplexFloat32(0.0, 0.0)
         )  # 2^num_qubits
         state_vector.memset_zero()  # Initialize the state vector with zeros
 
@@ -125,10 +129,38 @@ struct StateVector(Copyable, Movable, Stringable, Writable):
                 index |= 1 << i  # Set the bit at position i
             i += 1
 
-        state_vector[index] = ComplexFloat64(
+        state_vector[index] = ComplexFloat32(
             1.0, 0.0
         )  # Set the amplitude for the state to 1
         return Self(num_qubits, state_vector)
+
+    # @staticmethod
+    # fn from_bitstring_gpu(
+    #     bitstring: String,    # GPU does not support String
+    #     quantum_state_re: LayoutTensor[
+    #         mut=True, dtype, state_vector_3qubits_layout
+    #     ],
+    #     quantum_state_im: LayoutTensor[
+    #         mut=True, dtype, state_vector_3qubits_layout
+    #     ],
+    # ) -> None:
+    #     """Fill the quantum state vector from the state of the given bitstring.
+
+    #     Params:
+    #         bitstring: A string of '0's and '1's representing the state, with
+    #                     the least significant qubit (top one) (LSB) at the start.
+    #         gate_re: Real part of the gate matrix, initialized to zeros.
+    #         gate_im: Imaginary part of the gate matrix, initialized to zeros.
+    #     """
+    #     # Put coefficent correspondin to the bitstring to 1
+    #     index: Int = 0
+    #     i: Int = 0
+    #     for bit in bitstring.codepoints():
+    #         if bit == Codepoint.ord("1"):
+    #             index |= 1 << i  # Set the bit at position i
+    #         i += 1
+
+    #     quantum_state_re[index, 0] = 1.0
 
     fn write_to[W: Writer](self, mut writer: W) -> None:
         writer.write(String(self))
@@ -147,7 +179,7 @@ struct StateVector(Copyable, Movable, Stringable, Writable):
         """Fills the state vector with zeros."""
         self.state_vector.memset_zero()  # Set all elements to zero
         # for i in range(self.size()):
-        #     self.state_vector[i] = ComplexFloat64(0.0, 0.0)  # Set each amplitude to zero
+        #     self.state_vector[i] = ComplexFloat32(0.0, 0.0)  # Set each amplitude to zero
 
     fn is_valid_state(self) -> Bool:
         """Checks if the state vector is a valid quantum state.
@@ -162,7 +194,7 @@ struct StateVector(Copyable, Movable, Stringable, Writable):
             return False  # No qubits means no valid state
 
         # Use the buil-in methods of the Complex type
-        squared_norm: Float64 = 0.0
+        squared_norm: Float32 = 0.0
         for amplitude in self.state_vector:
             squared_norm += amplitude.squared_norm()
         # Check if the squared norm is approximately equal to 1
@@ -215,7 +247,7 @@ struct StateVector(Copyable, Movable, Stringable, Writable):
     #                         and without duplicates.
 
     @always_inline
-    fn purity(self, arg_qubits_to_keep: LinkedList[Int] = []) -> Float64:
+    fn purity(self, arg_qubits_to_keep: LinkedList[Int] = []) -> Float32:
         """Calculates the purity of the pure state.
 
         The purity is defined as the trace of the density matrix squared.
@@ -271,7 +303,7 @@ struct StateVector(Copyable, Movable, Stringable, Writable):
         density_matrix: ComplexMatrix = partial_trace(self, qubits_to_trace_out)
 
         # density_matrix = self.to_density_matrix()
-        trace_squared: Float64 = 0.0
+        trace_squared: Float32 = 0.0
 
         for i in range(density_matrix.size()):
             trace_squared += density_matrix[i, i].squared_norm()
@@ -279,7 +311,7 @@ struct StateVector(Copyable, Movable, Stringable, Writable):
         return trace_squared
 
     @always_inline
-    fn normalised_purity(self, qubits_to_keep: LinkedList[Int] = []) -> Float64:
+    fn normalised_purity(self, qubits_to_keep: LinkedList[Int] = []) -> Float32:
         """Calculates the normalised purity of the pure state.
 
         For a density matrix of size 2n×2n, purity ranges from 1/2^n to 1.
@@ -293,7 +325,7 @@ struct StateVector(Copyable, Movable, Stringable, Writable):
         )
 
     @always_inline
-    fn linear_entropy(self, qubits_to_keep: LinkedList[Int] = []) -> Float64:
+    fn linear_entropy(self, qubits_to_keep: LinkedList[Int] = []) -> Float32:
         """Calculates the linear entropy of the pure state.
 
         The linear entropy is defined as 1 - purity.
@@ -311,7 +343,7 @@ struct ComplexMatrix(Copyable, Movable, Stringable, Writable):
     This is used to represent quantum gates in the form of matrices.
     """
 
-    var matrix: List[List[ComplexFloat64]]
+    var matrix: List[List[ComplexFloat32]]
     """The 2D matrix representation of the quantum gate."""
 
     fn __init__(out self, rows: Int, cols: Int):
@@ -321,23 +353,23 @@ struct ComplexMatrix(Copyable, Movable, Stringable, Writable):
             rows: The number of rows in the matrix.
             cols: The number of columns in the matrix.
         """
-        self.matrix = List[List[ComplexFloat64]](
+        self.matrix = List[List[ComplexFloat32]](
             length=rows,
-            fill=List[ComplexFloat64](
-                length=cols, fill=ComplexFloat64(0.0, 0.0)
+            fill=List[ComplexFloat32](
+                length=cols, fill=ComplexFloat32(0.0, 0.0)
             ),
         )
         # # Initialize the matrix with zeros
         # for i in range(rows):
         #     for j in range(cols):
-        #         self.matrix[i][j] = ComplexFloat64(0.0, 0.0)
+        #         self.matrix[i][j] = ComplexFloat32(0.0, 0.0)
 
     @always_inline
-    fn __getitem__(self, row: Int, col: Int) -> ComplexFloat64:
+    fn __getitem__(self, row: Int, col: Int) -> ComplexFloat32:
         return self.matrix[row][col]
 
     @always_inline
-    fn __setitem__(mut self, row: Int, col: Int, value: ComplexFloat64) -> None:
+    fn __setitem__(mut self, row: Int, col: Int, value: ComplexFloat32) -> None:
         """Sets the value at the specified row and column in the matrix.
         Args:
             row: The row index of the matrix.
