@@ -14,6 +14,17 @@ from .state_and_matrix import (
 # MARK:         Aliases              #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
+alias Identity = Gate(
+    size=2,
+    matrix=ComplexMatrix(
+        List[List[ComplexFloat64]](
+            [ComplexFloat64(1, 0), ComplexFloat64(0, 0)],
+            [ComplexFloat64(0, 0), ComplexFloat64(1, 0)],
+        )
+    ),
+    symbol="I",
+)
+
 alias Hadamard = Gate(
     size=2,
     matrix=ComplexMatrix(

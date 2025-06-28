@@ -1,6 +1,7 @@
-from .state_and_matrix import PureBasisState, ComplexMatrix
+from .state_and_matrix import StateVector, ComplexMatrix
 
 from .gate import (
+    Identity,
     Gate,
     Hadamard,
     PauliX,

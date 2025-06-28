@@ -9,7 +9,7 @@ from ..base.qubits_operations import (
 )
 
 from ..base.state_and_matrix import (
-    PureBasisState,
+    StateVector,
 )
 from ..base.gate import _START, _SEPARATOR, SWAP
 
@@ -40,9 +40,9 @@ struct StateVectorSimulator(Copyable, Movable):
     """The quantum circuit containing the gates to be applied."""
     var original_circuit: GateCircuit
     """The original circuit before any modifications, used for resetting the simulator."""
-    var initial_state: PureBasisState
+    var initial_state: StateVector
     """The initial state of the quantum system before any gates are applied."""
-    var original_initial_state: PureBasisState
+    var original_initial_state: StateVector
     """The original initial state before any modifications, used for resetting the simulator."""
     var optimisation_level: Int
     """The level of optimisation to apply during simulation, affecting performance and accuracy."""
@@ -55,9 +55,9 @@ struct StateVectorSimulator(Copyable, Movable):
     fn __init__(
         out self,
         owned circuit: GateCircuit,
-        # initial_state: Optional[PureBasisState] = None, # TODO ask how to use that with return of next_layer()
+        # initial_state: Optional[StateVector] = None, # TODO ask how to use that with return of next_layer()
         # initial_state: __type_of(Self.initial_state), # doesn't work
-        initial_state: PureBasisState,
+        initial_state: StateVector,
         optimisation_level: Int = 0,
         verbose: Bool = False,
         verbose_step_size: String = "ShowOnlyEnd",
@@ -71,7 +71,7 @@ struct StateVectorSimulator(Copyable, Movable):
             verbose: Whether to print verbose output during simulation steps.
             verbose_step_size: The verbosity level for simulation output.
         """
-        # new_initial_state = initial_state.or_else(PureBasisState.from_bitstring("0" * circuit.num_qubits))
+        # new_initial_state = initial_state.or_else(StateVector.from_bitstring("0" * circuit.num_qubits))
         new_initial_state = initial_state
         self.circuit = circuit
         self.original_circuit = circuit
@@ -84,7 +84,7 @@ struct StateVectorSimulator(Copyable, Movable):
     @always_inline
     fn next_gate(
         mut self,
-        owned quantum_state: PureBasisState,
+        owned quantum_state: StateVector,
     ) -> __type_of(quantum_state):
         """Applies the next gate in the circuit to the quantum state.
 
@@ -132,7 +132,7 @@ struct StateVectorSimulator(Copyable, Movable):
 
     fn next_layer(
         self,
-        quantum_state: PureBasisState,
+        quantum_state: StateVector,
     ) -> (Self, __type_of(quantum_state)):
         """Applies the next layer of gates in the circuit to the quantum state.
 
@@ -185,11 +185,11 @@ struct StateVectorSimulator(Copyable, Movable):
 
     fn next_block(
         self,
-        quantum_state: PureBasisState,
+        quantum_state: StateVector,
     ) -> (Self, __type_of(quantum_state)):
         return self.next_layer(quantum_state)  # For now, treat blocks as layers
 
-    fn run(self) -> PureBasisState:
+    fn run(self) -> StateVector:
         """Runs the quantum circuit simulation.
 
         Applies all gates in sequence to the initial state and computes the
@@ -197,7 +197,7 @@ struct StateVectorSimulator(Copyable, Movable):
         the specified verbosity level.
 
         Returns:
-            The final `PureBasisState` after all gates have been applied.
+            The final `StateVector` after all gates have been applied.
         """
         if self.verbose:
             print(
@@ -207,7 +207,7 @@ struct StateVectorSimulator(Copyable, Movable):
             print("Initial state:\n", self.initial_state)
 
         # Start with the initial state
-        quantum_state: PureBasisState = self.initial_state
+        quantum_state: StateVector = self.initial_state
         i: Int = 0
         layer_index: Int = 0
         for gate in self.circuit.gates:  # Iterate over the gates in the circuit
