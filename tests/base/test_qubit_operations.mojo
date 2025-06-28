@@ -34,7 +34,7 @@ from qlabs.base import (
 )
 
 from qlabs.local_stdlib import CustomList
-from qlabs.local_stdlib.complex import ComplexFloat64
+from qlabs.local_stdlib.complex import ComplexFloat32
 
 
 def test_qubit_wise_multiply_0():
@@ -52,15 +52,15 @@ def test_qubit_wise_multiply_0():
         quantum_state,
         StateVector(
             3,
-            CustomList[ComplexFloat64, hint_trivial_type=True](
-                ComplexFloat64(0.5, 0),
-                ComplexFloat64(0, 0),
-                ComplexFloat64(0, 0),
-                ComplexFloat64(0.5, 0),
-                ComplexFloat64(0.5, 0),
-                ComplexFloat64(0, 0),
-                ComplexFloat64(0, 0),
-                ComplexFloat64(0.5, 0),
+            CustomList[ComplexFloat32, hint_trivial_type=True](
+                ComplexFloat32(0.5, 0),
+                ComplexFloat32(0, 0),
+                ComplexFloat32(0, 0),
+                ComplexFloat32(0.5, 0),
+                ComplexFloat32(0.5, 0),
+                ComplexFloat32(0, 0),
+                ComplexFloat32(0, 0),
+                ComplexFloat32(0.5, 0),
             ),
         ),
     )
@@ -103,15 +103,15 @@ def test_qubit_wise_multiply_figure1():
         quantum_state,
         StateVector(
             3,
-            CustomList[ComplexFloat64, hint_trivial_type=True](
-                ComplexFloat64(0, 0),
-                ComplexFloat64(0, 0),
-                ComplexFloat64(0, 0),
-                ComplexFloat64(-1.0 / sqrt(2.0), 0),
-                ComplexFloat64(1.0 / sqrt(2.0), 0),
-                ComplexFloat64(0, 0),
-                ComplexFloat64(0, 0),
-                ComplexFloat64(0, 0),
+            CustomList[ComplexFloat32, hint_trivial_type=True](
+                ComplexFloat32(0, 0),
+                ComplexFloat32(0, 0),
+                ComplexFloat32(0, 0),
+                ComplexFloat32(-1.0 / Float32(sqrt(2.0)), 0),
+                ComplexFloat32(1.0 / Float32(sqrt(2.0)), 0),
+                ComplexFloat32(0, 0),
+                ComplexFloat32(0, 0),
+                ComplexFloat32(0, 0),
             ),
         ),
     )
@@ -121,41 +121,41 @@ def test_partial_trace_all():
     """Test the partial trace operation on a 2-qubit state. Keep all qubits."""
     state: StateVector = StateVector(
         2,
-        CustomList[ComplexFloat64, hint_trivial_type=True](
-            ComplexFloat64(0, 0),
-            ComplexFloat64(-0.5, 0),
-            ComplexFloat64(0.7071067811863477, 0),
-            ComplexFloat64(-0.5, 0),
+        CustomList[ComplexFloat32, hint_trivial_type=True](
+            ComplexFloat32(0, 0),
+            ComplexFloat32(-0.5, 0),
+            ComplexFloat32(0.7071067811863477, 0),
+            ComplexFloat32(-0.5, 0),
         ),
     )
     matrix: ComplexMatrix = partial_trace(state, [])
     assert_matrix_almost_equal(
         matrix,
         ComplexMatrix(
-            List[List[ComplexFloat64]](
+            List[List[ComplexFloat32]](
                 [
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0, 0),
                 ],
                 [
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0.25, 0),
-                    ComplexFloat64(-0.3535533905929741, 0),
-                    ComplexFloat64(0.25, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0.25, 0),
+                    ComplexFloat32(-0.3535533905929741, 0),
+                    ComplexFloat32(0.25, 0),
                 ],
                 [
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(-0.3535533905929741, 0),
-                    ComplexFloat64(0.5, 0),
-                    ComplexFloat64(-0.3535533905929741, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(-0.3535533905929741, 0),
+                    ComplexFloat32(0.5, 0),
+                    ComplexFloat32(-0.3535533905929741, 0),
                 ],
                 [
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0.25, 0),
-                    ComplexFloat64(-0.3535533905929741, 0),
-                    ComplexFloat64(0.25, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0.25, 0),
+                    ComplexFloat32(-0.3535533905929741, 0),
+                    ComplexFloat32(0.25, 0),
                 ],
             )
         ),
@@ -168,15 +168,15 @@ def test_partial_trace_sec67():
     """
     state: StateVector = StateVector(
         3,
-        CustomList[ComplexFloat64, hint_trivial_type=True](
-            ComplexFloat64(0.5, 0),
-            ComplexFloat64(0, 0),
-            ComplexFloat64(0, 0),
-            ComplexFloat64(0.5, 0),
-            ComplexFloat64(0.5, 0),
-            ComplexFloat64(0, 0),
-            ComplexFloat64(0, 0),
-            ComplexFloat64(0.5, 0),
+        CustomList[ComplexFloat32, hint_trivial_type=True](
+            ComplexFloat32(0.5, 0),
+            ComplexFloat32(0, 0),
+            ComplexFloat32(0, 0),
+            ComplexFloat32(0.5, 0),
+            ComplexFloat32(0.5, 0),
+            ComplexFloat32(0, 0),
+            ComplexFloat32(0, 0),
+            ComplexFloat32(0.5, 0),
         ),
     )
 
@@ -184,9 +184,9 @@ def test_partial_trace_sec67():
     assert_matrix_almost_equal(
         matrix,
         ComplexMatrix(
-            List[List[ComplexFloat64]](
-                [ComplexFloat64(0.5, 0), ComplexFloat64(0.5, 0)],
-                [ComplexFloat64(0.5, 0), ComplexFloat64(0.5, 0)],
+            List[List[ComplexFloat32]](
+                [ComplexFloat32(0.5, 0), ComplexFloat32(0.5, 0)],
+                [ComplexFloat32(0.5, 0), ComplexFloat32(0.5, 0)],
             )
         ),
         "partial trace qubit 0 and 1",
@@ -196,30 +196,30 @@ def test_partial_trace_sec67():
     assert_matrix_almost_equal(
         matrix,
         ComplexMatrix(
-            List[List[ComplexFloat64]](
+            List[List[ComplexFloat32]](
                 [
-                    ComplexFloat64(0.5, 0),
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0.5, 0),
+                    ComplexFloat32(0.5, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0.5, 0),
                 ],
                 [
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0, 0),
                 ],
                 [
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0, 0),
                 ],
                 [
-                    ComplexFloat64(0.5, 0),
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0.5, 0),
+                    ComplexFloat32(0.5, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0.5, 0),
                 ],
             )
         ),
@@ -230,9 +230,9 @@ def test_partial_trace_sec67():
     assert_matrix_almost_equal(
         matrix,
         ComplexMatrix(
-            List[List[ComplexFloat64]](
-                [ComplexFloat64(0.5, 0), ComplexFloat64(0, 0)],
-                [ComplexFloat64(0, 0), ComplexFloat64(0.5, 0)],
+            List[List[ComplexFloat32]](
+                [ComplexFloat32(0.5, 0), ComplexFloat32(0, 0)],
+                [ComplexFloat32(0, 0), ComplexFloat32(0.5, 0)],
             )
         ),
         "partial trace qubits 1 and 2",
@@ -242,30 +242,30 @@ def test_partial_trace_sec67():
     assert_matrix_almost_equal(
         matrix,
         ComplexMatrix(
-            List[List[ComplexFloat64]](
+            List[List[ComplexFloat32]](
                 [
-                    ComplexFloat64(0.25, 0),
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0.25, 0),
-                    ComplexFloat64(0, 0),
+                    ComplexFloat32(0.25, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0.25, 0),
+                    ComplexFloat32(0, 0),
                 ],
                 [
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0.25, 0),
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0.25, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0.25, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0.25, 0),
                 ],
                 [
-                    ComplexFloat64(0.25, 0),
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0.25, 0),
-                    ComplexFloat64(0, 0),
+                    ComplexFloat32(0.25, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0.25, 0),
+                    ComplexFloat32(0, 0),
                 ],
                 [
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0.25, 0),
-                    ComplexFloat64(0, 0),
-                    ComplexFloat64(0.25, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0.25, 0),
+                    ComplexFloat32(0, 0),
+                    ComplexFloat32(0.25, 0),
                 ],
             )
         ),

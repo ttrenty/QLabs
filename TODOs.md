@@ -4,7 +4,7 @@
 
 ### Implementations
 
-- 5 / 5 : Start adding support for GPU in the base classes if needed (not possible to use SIMD(complexfloat64) anymore, or keep them but seperate them when moving data to GPU)
+- 5 / 5 : Start adding support for GPU in the base classes if needed (not possible to use SIMD(ComplexFloat32) anymore, or keep them but seperate them when moving data to GPU)
     - struct StateVector
     - struct ComplexMatrix
     - struct Gate
@@ -14,6 +14,8 @@
     - apply_swap()
     - partial_trace()
     - StateVector.to_density_matrix()
+
+- 4 / 3 : Export benchmark results as plots.
 
 - 2 / 4 : Efficient support for tracking a state statistic like entropy during the execution of the circuit by the simulator.
 
