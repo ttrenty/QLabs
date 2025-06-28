@@ -4,14 +4,13 @@
 
 from sys import argv
 import random
-from collections.linked_list import LinkedList
 
 # from complex import ComplexFloat64
 from qlabs.local_stdlib.complex import ComplexFloat64
 from qlabs.local_stdlib import CustomList
 
 from qlabs.base import (
-    PureBasisState,
+    StateVector,
     ComplexMatrix,
     Gate,
     Hadamard,
@@ -39,6 +38,8 @@ from qlabs.abstractions import (
     ShowOnlyEnd,
 )
 
+from gpu_examples import gpu_debug_something
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # MARK:         Examples             #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -57,7 +58,7 @@ fn simulate_figure1_circuit() -> None:
     """
     )
     # Initialize the quantum circuit to the |000⟩ state
-    quantum_state: PureBasisState = PureBasisState.from_bitstring("000")
+    quantum_state: StateVector = StateVector.from_bitstring("000")
 
     print("Initial quantum state:\n", quantum_state)
 
@@ -129,7 +130,7 @@ fn simulate_figure1_circuit_abstract() -> None:
     )
 
     # Create the initial state |000⟩
-    initial_state: PureBasisState = PureBasisState.from_bitstring("000")
+    initial_state: StateVector = StateVector.from_bitstring("000")
 
     qsimu = StateVectorSimulator(
         qc,
@@ -208,7 +209,7 @@ fn simulate_random_circuit(num_qubits: Int, number_layers: Int) -> None:
     initial_state_bitstring: String = (
         "0" * num_qubits
     )  # Initial state |000...0⟩
-    initial_state: PureBasisState = PureBasisState.from_bitstring(
+    initial_state: StateVector = StateVector.from_bitstring(
         initial_state_bitstring
     )
 
@@ -245,7 +246,7 @@ fn simulate_figure4_circuit() -> None:
     num_qubits: Int = 3
 
     # Initialize the quantum circuit to the |000⟩ state
-    quantum_state: PureBasisState = PureBasisState.from_bitstring("000")
+    quantum_state: StateVector = StateVector.from_bitstring("000")
 
     print("Intial quantum state:\n", quantum_state)
 
@@ -337,7 +338,7 @@ fn simulate_figure4_circuit_abstract() -> None:
 
     qsimu = StateVectorSimulator(
         qc,
-        initial_state=PureBasisState.from_bitstring("000"),
+        initial_state=StateVector.from_bitstring("000"),
         optimisation_level=0,  # No optimisations for now
         verbose=True,
         verbose_step_size=ShowAfterEachGate,  # ShowAfterEachGate, ShowOnlyEnd
@@ -371,7 +372,7 @@ fn presentation() -> None:
 
     qsimu = StateVectorSimulator(
         qc,
-        initial_state=PureBasisState.from_bitstring("000"),
+        initial_state=StateVector.from_bitstring("000"),
         optimisation_level=0,  # No optimisations for now
         verbose=True,
         verbose_step_size=ShowAfterEachGate,  # ShowAfterEachGate, ShowOnlyEnd
@@ -399,7 +400,7 @@ fn test_density_matrix() -> None:
 
     qsimu = StateVectorSimulator(
         qc,
-        initial_state=PureBasisState.from_bitstring("00"),
+        initial_state=StateVector.from_bitstring("00"),
         optimisation_level=0,  # No optimisations for now
         verbose=True,
         verbose_step_size=ShowAfterEachGate,  # ShowAfterEachGate, ShowOnlyEnd
@@ -421,44 +422,129 @@ fn test_density_matrix() -> None:
     print("Partial trace matrix qubit 1:\n", other_matrix_1)
 
 
+fn try_get_purity() -> None:
+    """
+    Returns the density matrix of the given quantum state.
+    If qubits is empty, returns the full density matrix.
+    """
+    num_qubits: Int = 2
+    qc: GateCircuit = GateCircuit(num_qubits)
+
+    qc.apply_gates(
+        Hadamard(0),
+        Hadamard(1, controls=[0]),
+        Z(0),
+        X(1),
+    )
+
+    print("Quantum circuit created:\n", qc)
+
+    qsimu = StateVectorSimulator(
+        qc,
+        initial_state=StateVector.from_bitstring("00"),
+        optimisation_level=0,  # No optimisations for now
+        verbose=True,
+        verbose_step_size=ShowAfterEachGate,  # ShowAfterEachGate, ShowOnlyEnd
+    )
+    final_state = qsimu.run()
+    print("Final quantum state:\n", final_state)
+
+    purity = final_state.purity()
+    print("Purity of the quantum state:", purity)
+
+    purity0 = final_state.purity([0, 1])
+    print("Purity of the quantum state:", purity0)
+
+    purity1 = final_state.purity([0])
+    print("Purity of qubit 0:", purity1)
+
+    # for QOL
+    # list_purity = final_state.purity(0, 1)
+    # print("Purity of qubit 0:", list_purity[0])
+    # print("Purity of qubit 1:", list_purity[1])
+
+    normalised_purity = final_state.normalised_purity()
+    print("Normalised purity of the quantum state:", normalised_purity)
+
+
+fn try_measument() -> None:
+    """
+    Returns the density matrix of the given quantum state.
+    If qubits is empty, returns the full density matrix.
+    """
+    num_qubits: Int = 2
+    qc: GateCircuit = GateCircuit(num_qubits)
+
+    qc.apply_gates(
+        Hadamard(0),
+        Hadamard(1, controls=[0]),
+        Z(0),
+        X(1),
+    )
+
+    print("Quantum circuit created:\n", qc)
+
+    qsimu = StateVectorSimulator(
+        qc,
+        initial_state=StateVector.from_bitstring("00"),
+        optimisation_level=0,  # No optimisations for now
+        verbose=True,
+        verbose_step_size=ShowAfterEachGate,  # ShowAfterEachGate, ShowOnlyEnd
+    )
+    final_state = qsimu.run()
+    print("Final quantum state:\n", final_state)
+
+    purity = final_state.purity()
+    print("Purity of the quantum state:", purity)
+
+    purity0 = final_state.purity([0, 1])
+    print("Purity of the quantum state:", purity0)
+
+    purity1 = final_state.purity([0])
+    print("Purity of qubit 0:", purity1)
+
+    # for QOL
+    # list_purity = final_state.purity(0, 1)
+    # print("Purity of qubit 0:", list_purity[0])
+    # print("Purity of qubit 1:", list_purity[1])
+
+    normalised_purity = final_state.normalised_purity()
+    print("Normalised purity of the quantum state:", normalised_purity)
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-# MARK:         Tests                #
+# MARK:         Debug                #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-# fn test_all() -> None:
-#     """
-#     Runs all tests and examples.
-#     """
-# qc = qc.apply_layer([
-#     Hadamard([1]),
-#     NOT([2], controls=[1], anti_controls=[])
-#     ])
-# qc = qc.apply_layer([
-#     NOT([0], controls=[1], anti_controls=[])
-# ])
-# qc = qc.apply_layer([
-#     PauliZ([0]),
-#     NOT([2], controls=[1], anti_controls=[])
-#     ])
 
-# # Create the initial state |000⟩
-# initial_state: PureBasisState = PureBasisState.from_bitstring("000")
+# fn qubit_wise_multiply_gpu(
+#     # gate: ComplexMatrix,
+#     # Use SIMD instead
+#     gate_re: LayoutTensor[mut=True, dtype, gate_1qubit_layout],
+#     gate_im: LayoutTensor[mut=True, dtype, gate_1qubit_layout],
+#     gate_size: Int,
+#     target_qubit: Int,
+#     # owned quantum_state: StateVector,
+#     quantum_state_re: LayoutTensor[
+#         mut=True, dtype, state_vector_3qubits_layout
+#     ],
+#     quantum_state_im: LayoutTensor[
+#         mut=True, dtype, state_vector_3qubits_layout
+#     ],
+#     number_qubits: Int,
+#     quantum_state_size: Int,
+#     quantum_state_out_re: LayoutTensor[
+#         mut=True, dtype, state_vector_3qubits_layout
+#     ],
+#     quantum_state_out_im: LayoutTensor[
+#         mut=True, dtype, state_vector_3qubits_layout
+#     ],
+#     control_bits: List[List[Int]] = [],
+# ) -> None:
 
-# qsimu = StateVectorSimulator(
-#     qc,
-#     initial_state=initial_state,
-#     optimisation_level=0,  # No optimisations for now
-#     verbose=True,
-#     # verbose_step_size=ShowAfterEachLayer,  # ShowAfterEachGate, ShowOnlyEnd
-#     verbose_step_size=ShowAfterEachGate,  # ShowAfterEachGate, ShowOnlyEnd
-# )
 
-# while (qsimu.circuit.num_gates() != 0):
-#     qsimu, state = qsimu.next_gate(state)
-#     print("New quantum state after gate:\n", state)
-#     # qsimu, state = qsimu.next_layer(state)
-#     # or
-#     # qsimu, state = qsimu.next_block(state)
+fn debug_something():
+    return
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -484,9 +570,9 @@ def main():
 
     # simulate_figure1_circuit()
 
-    simulate_figure1_circuit_abstract()
+    # simulate_figure1_circuit_abstract()
 
-    simulate_random_circuit(number_qubits, number_layers)
+    # simulate_random_circuit(number_qubits, number_layers)
 
     # simulate_figure4_circuit()
 
@@ -495,3 +581,9 @@ def main():
     # presentation()
 
     # test_density_matrix()
+
+    # try_get_purity()
+
+    # debug_something()
+
+    gpu_debug_something()

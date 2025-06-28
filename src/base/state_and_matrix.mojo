@@ -2,8 +2,12 @@
 # MARK:         Imports              #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
+from collections.linked_list import LinkedList
+
 from ..local_stdlib import CustomList
 from ..local_stdlib.complex import ComplexFloat64
+
+from .qubits_operations import partial_trace
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -12,8 +16,8 @@ from ..local_stdlib.complex import ComplexFloat64
 
 
 @fieldwise_init
-# struct PureBasisState[check_bounds:Bool = False](Copyable, Movable, Stringable, Writable):
-struct PureBasisState(Copyable, Movable, Stringable, Writable):
+# struct StateVector[check_bounds:Bool = False](Copyable, Movable, Stringable, Writable):
+struct StateVector(Copyable, Movable, Stringable, Writable):
     """Represents a pure quantum state as a basis state in the computational basis.
 
     Uses a vector of complex numbers to represent the amplitudes of the basis states.
@@ -27,7 +31,7 @@ struct PureBasisState(Copyable, Movable, Stringable, Writable):
     """The state vector representing the amplitudes of the basis states."""
 
     fn __init__(out self, size: Int):
-        """Initializes a PureBasisState with the given size.
+        """Initializes a StateVector with the given size.
 
         Args:
             size: The size of the vector, which is 2^n for n qubits.
@@ -53,9 +57,9 @@ struct PureBasisState(Copyable, Movable, Stringable, Writable):
         self.state_vector[index] = value
 
     fn __str__(self) -> String:
-        """Returns a beautifully formatted string representation of the PureBasisState.
+        """Returns a beautifully formatted string representation of the StateVector.
         """
-        string: String = "PureBasisState:\n"
+        string: String = "StateVector:\n"
         for i in range(self.size()):
             amplitude = self.state_vector[i]
             # amplitude_str: String = String(amplitude)
@@ -88,7 +92,7 @@ struct PureBasisState(Copyable, Movable, Stringable, Writable):
 
     @staticmethod
     fn from_bitstring(bitstring: String) -> Self:
-        """Returns a PureBasisState corresponding to the given bitstring.
+        """Returns a StateVector corresponding to the given bitstring.
 
         Params:
             bitstring: A string of '0's and '1's representing the state, with
@@ -96,11 +100,11 @@ struct PureBasisState(Copyable, Movable, Stringable, Writable):
 
         Examples:
         ```mojo
-        state = PureBasisState.from_bitstring("110")
+        state = StateVector.from_bitstring("110")
         ```
 
         Returns:
-            A PureBasisState object with the appropriate data initialized.
+            A StateVector object with the appropriate data initialized.
         """
         num_qubits: Int = len(bitstring)
 
@@ -173,7 +177,7 @@ struct PureBasisState(Copyable, Movable, Stringable, Writable):
         in the state vector.
 
         Returns:
-            A new PureBasisState with the conjugated amplitudes.
+            A new StateVector with the conjugated amplitudes.
         """
         conjugated_state: Self = Self(self.num_qubits, self.state_vector.copy())
 
@@ -181,6 +185,10 @@ struct PureBasisState(Copyable, Movable, Stringable, Writable):
             conjugated_state.state_vector[i] = self.state_vector[i].conjugate()
         return conjugated_state
 
+    # @always_inline
+    # fn tensor_product()
+
+    @always_inline
     fn to_density_matrix(self) -> ComplexMatrix:
         """Returns the density matrix of the pure state.
 
@@ -198,6 +206,102 @@ struct PureBasisState(Copyable, Movable, Stringable, Writable):
                     self.state_vector[i] * self.state_vector[j].conjugate()
                 )
         return density_matrix
+
+    # fn partial_trace[
+    #     use_lookup_table: Bool = True
+    # ](quantum_state: StateVector, qubits_to_trace_out: List[Int],) -> ComplexMatrix:
+
+    # qubits_to_trace_out: An array of indices of qubits to trace out, in ascending order
+    #                         and without duplicates.
+
+    @always_inline
+    fn purity(self, arg_qubits_to_keep: LinkedList[Int] = []) -> Float64:
+        """Calculates the purity of the pure state.
+
+        The purity is defined as the trace of the density matrix squared.
+
+        Args:
+            arg_qubits_to_keep: A list of qubit indices to keep in the state in stricly ascending order.
+                                If empty, all qubits are kept.
+
+        Returns:
+            The purity of the pure state, which should be 1 for a valid pure state.
+        """
+        qubits_to_keep = arg_qubits_to_keep.copy()
+
+        # Sanity check for ascending order and in range
+        for i in range(len(qubits_to_keep)):
+            qubit: Int = qubits_to_keep[i]
+            if qubit < 0 or qubit >= self.num_qubits:
+                print(
+                    "Error: Qubit index",
+                    qubit,
+                    "is out of range for the number of qubits",
+                    self.num_qubits,
+                )
+                return 0.0
+            if i > 0 and qubits_to_keep[i - 1] >= qubit:
+                print(
+                    (
+                        "Error: Qubit indices must be in stricly ascending"
+                        " order. Found "
+                    ),
+                    qubits_to_keep[i - 1],
+                    "and",
+                    qubit,
+                )
+                return 0.0
+
+        # If no qubits to keep, keep all
+        if len(qubits_to_keep) == 0:
+            for i in range(self.num_qubits):
+                qubits_to_keep.append(i)
+
+        qubits_to_trace_out: List[Int] = []
+        current_qubit: Int = 0
+        for i in range(self.num_qubits):
+            if (
+                current_qubit < len(qubits_to_keep)
+                and qubits_to_keep[current_qubit] == i
+            ):
+                current_qubit += 1  # This qubit is kept, so skip it
+            else:
+                qubits_to_trace_out.append(i)  # This qubit is traced out
+
+        density_matrix: ComplexMatrix = partial_trace(self, qubits_to_trace_out)
+
+        # density_matrix = self.to_density_matrix()
+        trace_squared: Float64 = 0.0
+
+        for i in range(density_matrix.size()):
+            trace_squared += density_matrix[i, i].squared_norm()
+
+        return trace_squared
+
+    @always_inline
+    fn normalised_purity(self, qubits_to_keep: LinkedList[Int] = []) -> Float64:
+        """Calculates the normalised purity of the pure state.
+
+        For a density matrix of size 2n×2n, purity ranges from 1/2^n to 1.
+        The normalised purity is defined as the purity divided by the number of qubits.
+
+        Returns:
+            The normalised purity of the pure state.
+        """
+        return (self.size() * self.purity(qubits_to_keep) - 1) / (
+            self.size() - 1
+        )
+
+    @always_inline
+    fn linear_entropy(self, qubits_to_keep: LinkedList[Int] = []) -> Float64:
+        """Calculates the linear entropy of the pure state.
+
+        The linear entropy is defined as 1 - purity.
+
+        Returns:
+            The linear entropy of the pure state.
+        """
+        return 1.0 - self.purity(qubits_to_keep)
 
 
 @fieldwise_init
@@ -264,7 +368,7 @@ struct ComplexMatrix(Copyable, Movable, Stringable, Writable):
         writer.write(String(self))
 
     @always_inline
-    fn mult(self, other: PureBasisState, mut buffer: PureBasisState) -> None:
+    fn mult(self, other: StateVector, mut buffer: StateVector) -> None:
         """Multiplies the matrix by a complex vector and stores the result in a buffer.
 
         Args:

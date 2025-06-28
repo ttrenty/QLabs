@@ -4,6 +4,20 @@ name = "qlabs"
 platforms = ["linux-64"]
 version = "0.1.0"
 
+[feature.cuda]
+system-requirements = { cuda = "12" }
+channels = ["nvidia"]
+
+[feature.cuda.dependencies]
+cuda-toolkit = "12.*" # for compute-sanitizer etc.
+
+[dependencies]
+modular = ">=25.5.0.dev2025062705,<26"
+max = ">=25.5.0.dev2025062405,<26"
+
+[environments]
+cuda = { features = ["cuda"] }
+default = { features = ["cuda"] }
 
 [tasks.clear] # Clear the terminal
 cmd = "clear"
@@ -11,9 +25,21 @@ cmd = "clear"
 [tasks.lint] # Check code formatting using an external script
 cmd = ".github/scripts/check-format.sh"
 
-[tasks.format] # Format the code
-cmd = "pixi run mojo format ./src ./tests"
-inputs = ["./examples/**/*.mojo", "./src/**/*.mojo", "./tests/**/*.mojo"]
+[tasks.format_examples] # Format the examples code
+cmd = "pixi run mojo format ./examples"
+inputs = ["./examples/**/*.mojo"]
+
+[tasks.format_src] # Format the src code
+cmd = "pixi run mojo format ./src"
+inputs = ["./src/**/*.mojo"]
+
+[tasks.format_tests] # Format the tests code
+cmd = "pixi run mojo format ./tests"
+inputs = ["./tests/**/*.mojo"]
+
+[tasks.format_benchmarks] # Format the tests code
+cmd = "pixi run mojo format ./benchmarks"
+inputs = ["./benchmarks/**/*.mojo"]
 
 [tasks.create_build_dir]
 cmd = "mkdir -p build/"
@@ -22,8 +48,9 @@ cmd = "mkdir -p build/"
 args = [
     { "arg" = "full_file_path", "default" = "examples/main.mojo" },
     { "arg" = "executable_name", "default" = "main" },
+    { "arg" = "additional_input", "default" = "pixi.toml" },        # place holder to prevent freeze
 ]
-inputs = ["{{ full_file_path }}", "./src/**/*.mojo"]
+inputs = ["./src/**/*.mojo", "{{ full_file_path }}", "{{ additional_input }}"]
 outputs = ["build/{{ executable_name }}"]
 cmd = "pixi run mojo build {{ full_file_path }} -o {{ executable_name }} && cp {{ executable_name }} build/{{ executable_name }} && rm {{ executable_name }}"
 depends-on = ["create_build_dir"]
@@ -32,13 +59,13 @@ depends-on = ["create_build_dir"]
 cmd = "mkdir -p build/ && pixi run mojo package src -o qlabs.mojopkg && cp qlabs.mojopkg build/ && rm qlabs.mojopkg"
 inputs = ["./src/**/*.mojo"]
 outputs = ["build/qlabs.mojopkg"]
-depends-on = ["create_build_dir", "format"]
+depends-on = ["create_build_dir", "format_src"]
 
 [tasks.clean] # Clean the package files and Build directory
-cmd = "rm build/* && rmdir build/ && rm examples/qlabs.mojopkg && rm tests/qlabs.mojopkg"
+cmd = "rm build/* && rmdir build/ && rm examples/qlabs.mojopkg && rm tests/qlabs.mojopkg && rm benchmarks/qlabs.mojopkg"
 
 [tasks.install] # Install the package in the necessary directories
-cmd = "cp build/qlabs.mojopkg examples/qlabs.mojopkg && cp build/qlabs.mojopkg tests/qlabs.mojopkg"
+cmd = "cp build/qlabs.mojopkg examples/qlabs.mojopkg && cp build/qlabs.mojopkg tests/qlabs.mojopkg && cp build/qlabs.mojopkg benchmarks/qlabs.mojopkg"
 inputs = ["build/qlabs.mojopkg"]
 outputs = ["examples/qlabs.mojopkg", "tests/qlabs.mojopkg"]
 depends-on = ["package"]
@@ -47,15 +74,30 @@ depends-on = ["package"]
 cmd = "./build/main"
 depends-on = [
     "install",
+    "format_examples",
     { "task" = "build", "args" = [
         "examples/main.mojo",
         "main",
+        "./examples/**/*.mojo",
     ] },
 ]
 
 [tasks.test] # Unitary Tests (uses the mojo testing tool)
 cmd = "pixi run mojo test tests"
-depends-on = ["install"]
+depends-on = ["install", "format_tests"]
+
+[tasks.bench] # Run all benchmarks
+cmd = "./build/all_benchmarks"
+depends-on = [
+    "install",
+    "format_benchmarks",
+    { "task" = "build", "args" = [
+        "benchmarks/all_benchmarks.mojo",
+        "all_benchmarks",
+        "./benchmarks/**/*.mojo",
+    ] },
+]
+
 
 # # Benches
 # bench_decimal = "clear && pixi run package && cd benches/decimal && pixi run mojo -I ../ bench.mojo && cd ../.. && pixi run clean"
@@ -74,6 +116,3 @@ tests = [{ task = "test" }]
 p = [{ task = "clear" }, { task = "package" }]
 m = [{ task = "clear" }, { task = "main" }]
 # t = "clear && pixi run package && pixi run mojo test tests --filter"
-
-[dependencies]
-modular = ">=25.5.0.dev2025062405,<26"

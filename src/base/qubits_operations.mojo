@@ -10,14 +10,44 @@
 
 from bit import count_trailing_zeros
 
+from ..base.gate import (
+    Identity,
+    Gate,
+)
+
 from .state_and_matrix import (
-    PureBasisState,
+    StateVector,
     ComplexMatrix,
 )
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # MARK:         Functions            #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+# fn educational_qubit_wise_multiply(
+#     gate: ComplexMatrix,
+#     target_qubit: Int,
+#     owned quantum_state: StateVector,
+#     control_bits: List[List[Int]] = [],
+# ) -> __type_of(quantum_state):
+#     """Applies a quantum gate to specific qubits in the quantum state.
+
+#     It will apply the gate starting from the target qubit assuming that the other
+#     qubits that the gate acts on are following the target qubit.
+
+#     Args:
+#         gate: The 2x2 matrix representing the quantum gate.
+#         target_qubit: The index of the qubit on which the gate is applied.
+#         quantum_state: The current state of the quantum system.
+
+#     Returns:
+#         A new StateVector with the gate applied.
+#     """
+#     target_qubits_count: Int = count_trailing_zeros(gate_size)
+#     system_number_qubits: Int = quantum_state.number_qubits()
+
+#     # Apply the tensor product with Identity gates until the
 
 
 @always_inline
@@ -25,7 +55,7 @@ fn qubit_wise_multiply_extended(
     target_qubits_count: Int,
     gate: ComplexMatrix,
     target_qubits: List[Int],
-    owned quantum_state: PureBasisState,
+    owned quantum_state: StateVector,
     control_bits: List[List[Int]] = [],
 ) -> __type_of(quantum_state):
     """Applies a quantum gate to multiple qubits in the quantum state.
@@ -43,7 +73,7 @@ fn qubit_wise_multiply_extended(
                     it is an anti-control bit.
 
     Returns:
-        A new PureBasisState with the gate applied.
+        A new StateVector with the gate applied.
     """
     if target_qubits_count == 1:
         return qubit_wise_multiply(
@@ -79,9 +109,9 @@ fn qubit_wise_multiply_extended(
 
 @always_inline
 fn _apply_to_multi_qubits(
-    mut new_state_vector: PureBasisState,
+    mut new_state_vector: StateVector,
     gate: ComplexMatrix,
-    quantum_state: PureBasisState,
+    quantum_state: StateVector,
     size_of_state_vector: Int,
     size_of_block: Int,
     size_of_half_block: Int,
@@ -92,8 +122,8 @@ fn _apply_to_multi_qubits(
     indexes: List[Int] = List[Int](capacity=gate.size())
 
     # For Method 2:
-    # temp_vector_1 = PureBasisState(size=gate_size)
-    # temp_vector_2 = PureBasisState(size=gate_size)
+    # temp_vector_1 = StateVector(size=gate_size)
+    # temp_vector_2 = StateVector(size=gate_size)
 
     for block_start in range(0, size_of_state_vector, size_of_block):
         for offset in range(size_of_half_block):
@@ -139,9 +169,9 @@ fn _apply_to_multi_qubits(
 
 @always_inline
 fn _apply_to_2_qubit(
-    mut new_state_vector: PureBasisState,
+    mut new_state_vector: StateVector,
     gate: ComplexMatrix,
-    quantum_state: PureBasisState,
+    quantum_state: StateVector,
     size_of_state_vector: Int,
     size_of_block: Int,
     size_of_half_block: Int,
@@ -177,9 +207,9 @@ fn _apply_to_2_qubit(
 
 @always_inline
 fn _apply_to_1_qubit(
-    mut new_state_vector: PureBasisState,
+    mut new_state_vector: StateVector,
     gate: ComplexMatrix,
-    quantum_state: PureBasisState,
+    quantum_state: StateVector,
     size_of_state_vector: Int,
     size_of_block: Int,
     size_of_half_block: Int,
@@ -210,7 +240,7 @@ fn _apply_to_1_qubit(
 fn qubit_wise_multiply(
     gate: ComplexMatrix,
     target_qubit: Int,
-    owned quantum_state: PureBasisState,
+    owned quantum_state: StateVector,
     control_bits: List[List[Int]] = [],
 ) -> __type_of(quantum_state):
     """Applies a quantum gate to specific qubits in the quantum state.
@@ -227,7 +257,7 @@ fn qubit_wise_multiply(
                     it is an anti-control bit.
 
     Returns:
-        A new PureBasisState with the gate applied.
+        A new StateVector with the gate applied.
     """
     gate_size: Int = gate.size()
     target_qubits_count: Int = count_trailing_zeros(gate_size)
@@ -326,7 +356,7 @@ fn educational_apply_swap(
     num_qubits: Int,
     i: Int,
     j: Int,
-    quantum_state: PureBasisState,
+    quantum_state: StateVector,
     control_bits: List[List[Int]] = [],
 ) -> __type_of(quantum_state):
     """Applies a SWAP gate to two specific qubits in the quantum state.
@@ -341,7 +371,7 @@ fn educational_apply_swap(
                     If flag is 1, it is a control bit; if 0, it is an anti-control bit.
 
     Returns:
-        A new PureBasisState with the SWAP gate applied.
+        A new StateVector with the SWAP gate applied.
     """
 
     new_state_vector = quantum_state  # copies all amplitudes from quantum_state to new_state_vector
@@ -378,7 +408,7 @@ fn apply_swap(
     num_qubits: Int,
     i: Int,
     j: Int,
-    quantum_state: PureBasisState,
+    quantum_state: StateVector,
     control_bits: List[List[Int]] = [],
 ) -> __type_of(quantum_state):
     """Applies a SWAP gate to two specific qubits in the quantum state.
@@ -393,7 +423,7 @@ fn apply_swap(
                     If flag is 1, it is a control bit; if 0, it is an anti-control bit.
 
     Returns:
-        A new PureBasisState with the SWAP gate applied.
+        A new StateVector with the SWAP gate applied.
     """
     new_state_vector = quantum_state  # copies all amplitudes from quantum_state to new_state_vector
     if i == j:
@@ -460,9 +490,7 @@ fn _rearrange_bits(
     return return_value
 
 
-fn educational_partial_trace[
-    use_lookup_table: Bool = True
-](
+fn educational_partial_trace(
     n: Int,
     input_matrix: ComplexMatrix,
     qubits_to_trace_out: List[Int],
@@ -487,25 +515,6 @@ fn educational_partial_trace[
         if not is_traced_out[i]:
             qubits_to_keep.append(i)
 
-    # is_traced_out: List[Bool] = [False] * n
-    # qubits_to_keep: List[Int] = []
-
-    # current_index: Int = 0
-    # current_traced_index: Int = 0
-    # for _ in range(n):
-    #     if qubits_to_trace_out[current_traced_index] == current_index:
-    #         is_traced_out[current_index] = True
-    #         current_traced_index += 1
-    #         if current_traced_index >= len(qubits_to_trace_out):
-    #             break
-    #     else:
-    #         qubits_to_keep.append(i)
-    #     current_index += 1
-
-    # # Ensure all qubits have been added to qubits_to_keep
-    # for i in range(current_index, n):
-    #     qubits_to_keep.append(i)
-
     num_qubits_to_trace_out: Int = len(qubits_to_trace_out)
     num_qubits_to_keep: Int = len(qubits_to_keep)
     if num_qubits_to_trace_out + num_qubits_to_keep != n:
@@ -520,46 +529,24 @@ fn educational_partial_trace[
     # This is 2^num_qubits_to_keep == the dimension of the resulting matrix
     result_dimension: Int = 1 << num_qubits_to_keep
 
-    lookup_table: Dict[Int, Int] = {}
-
-    @parameter
-    if use_lookup_table:
-        for tmp in range(result_dimension):
-            lookup_table[tmp] = _rearrange_bits(tmp, qubits_to_keep)
-
     output_matrix: ComplexMatrix = ComplexMatrix(
         result_dimension, result_dimension
     )
     for shared_bits in range(
         traced_dimension
     ):  # bits common to input_row and input_col
-
-        @parameter
-        if use_lookup_table:
-            shared_bits_rearranged: Int = lookup_table.get(shared_bits, 0)
-        else:
-            shared_bits_rearranged: Int = _rearrange_bits(
-                shared_bits, qubits_to_trace_out
-            )
+        shared_bits_rearranged: Int = _rearrange_bits(
+            shared_bits, qubits_to_trace_out
+        )
 
         for output_row in range(result_dimension):
-
-            @parameter
-            if use_lookup_table:
-                input_row: Int = lookup_table.get(output_row, 0)
-            else:
-                input_row: Int = shared_bits_rearranged | _rearrange_bits(
-                    output_row, qubits_to_keep
-                )
+            input_row: Int = shared_bits_rearranged | _rearrange_bits(
+                output_row, qubits_to_keep
+            )
             for output_col in range(result_dimension):
-
-                @parameter
-                if use_lookup_table:
-                    input_col: Int = lookup_table.get(output_col, 0)
-                else:
-                    input_col: Int = shared_bits_rearranged | _rearrange_bits(
-                        output_col, qubits_to_keep
-                    )
+                input_col: Int = shared_bits_rearranged | _rearrange_bits(
+                    output_col, qubits_to_keep
+                )
 
                 output_matrix[output_row, output_col] += input_matrix[
                     input_row, input_col
@@ -570,14 +557,11 @@ fn educational_partial_trace[
 
 fn partial_trace[
     use_lookup_table: Bool = True
-](
-    quantum_state: PureBasisState,
-    qubits_to_trace_out: List[Int],
-) -> ComplexMatrix:
+](quantum_state: StateVector, qubits_to_trace_out: List[Int],) -> ComplexMatrix:
     """Performs a partial trace over specified qubits in a quantum state.
 
     Args:
-        quantum_state: A PureBasisState representing the quantum state.
+        quantum_state: A StateVector representing the quantum state.
         qubits_to_trace_out: An array of indices of qubits to trace out, in ascending order
                             and without duplicates.
 
@@ -650,20 +634,17 @@ fn partial_trace[
     for shared_bits in range(
         traced_dimension
     ):  # bits common to input_row and input_col
-
-        @parameter
-        if use_lookup_table:
-            shared_bits_rearranged: Int = lookup_table.get(shared_bits, 0)
-        else:
-            shared_bits_rearranged: Int = _rearrange_bits(
-                shared_bits, qubits_to_trace_out
-            )
+        shared_bits_rearranged: Int = _rearrange_bits(
+            shared_bits, qubits_to_trace_out
+        )
 
         for output_row in range(result_dimension):
 
             @parameter
             if use_lookup_table:
-                input_row: Int = lookup_table.get(output_row, 0)
+                input_row: Int = shared_bits_rearranged | lookup_table.get(
+                    output_row, 0
+                )
             else:
                 input_row: Int = shared_bits_rearranged | _rearrange_bits(
                     output_row, qubits_to_keep
@@ -672,7 +653,9 @@ fn partial_trace[
 
                 @parameter
                 if use_lookup_table:
-                    input_col: Int = lookup_table.get(output_col, 0)
+                    input_col: Int = shared_bits_rearranged | lookup_table.get(
+                        output_col, 0
+                    )
                 else:
                     input_col: Int = shared_bits_rearranged | _rearrange_bits(
                         output_col, qubits_to_keep
