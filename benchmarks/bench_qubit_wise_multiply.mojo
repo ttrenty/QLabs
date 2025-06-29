@@ -90,7 +90,7 @@ fn benchmark_qubit_wise_multiply[
 @parameter
 @always_inline
 fn benchmark_qubit_wise_multiply_inplace[
-    num_qubits: Int, number_layers: Int
+    num_qubits: Int, number_layers: Int, number_iterations: Int = 1
 ](mut b: Bencher) raises:
     gates_list: List[Gate] = [Hadamard, PauliX, PauliY, PauliZ]
 
@@ -99,7 +99,7 @@ fn benchmark_qubit_wise_multiply_inplace[
     )
     random.seed()  # Seed on current time
     random.randint(
-        indexes, number_layers * 2 * num_qubits, 0, len(gates_list) - 1
+        indexes, number_layers * 1 * num_qubits, 0, len(gates_list) - 1
     )
 
     @parameter
@@ -125,80 +125,86 @@ fn benchmark_qubit_wise_multiply_inplace[
         quantum_state_1 = StateVector.from_bitstring("0" * num_qubits)
 
         current_state = 0
-        for layer in range(number_layers):
-            for i in range(num_qubits):
-                # NOTE Works but is slow with the dictionary
-                # qubit_wise_multiply_inplace(
-                #     gates_list[Int(indexes[layer * num_qubits + i])].matrix,
-                #     i,
-                #     quantum_states[current_state],
-                #     quantum_states[1 - current_state],
-                # )
-                # NOTE: Fast buty doesn't actually use the next state for new operations
-                # qubit_wise_multiply_inplace(
-                #     gates_list[Int(indexes[layer * num_qubits + i])].matrix,
-                #     i,
-                #     quantum_state_0,
-                #     quantum_state_1,
-                # )
-                if current_state == 0:
-                    qubit_wise_multiply_inplace(
-                        gates_list[Int(indexes[layer * num_qubits + i])].matrix,
-                        i,
-                        quantum_state_0,
-                        quantum_state_1,
-                    )
-                    current_state = 1
-                else:
-                    qubit_wise_multiply_inplace(
-                        gates_list[Int(indexes[layer * num_qubits + i])].matrix,
-                        i,
-                        quantum_state_1,
-                        quantum_state_0,
-                    )
-                    current_state = 0
-            for i in range(num_qubits - 1):
-                # qubit_wise_multiply_inplace(
-                #     gates_list[
-                #         Int(indexes[layer * num_qubits + num_qubits + i])
-                #     ].matrix,
-                #     i,
-                #     quantum_states[current_state],
-                #     quantum_states[1 - current_state],
-                #     [[(i + 1) % num_qubits, 1]],
-                # )
-                # current_state = 1 - current_state
-                # qubit_wise_multiply_inplace(
-                #     gates_list[
-                #         Int(indexes[layer * num_qubits + num_qubits + i])
-                #     ].matrix,
-                #     i,
-                #     quantum_state_0,
-                #     quantum_state_1,
-                #     [[(i + 1) % num_qubits, 1]],
-                # )
-                if current_state == 0:
-                    qubit_wise_multiply_inplace(
-                        gates_list[
-                            Int(indexes[layer * num_qubits + num_qubits + i])
-                        ].matrix,
-                        i,
-                        quantum_state_0,
-                        quantum_state_1,
-                        [[(i + 1) % num_qubits, 1]],
-                    )
-                    current_state = 1
-                else:
-                    qubit_wise_multiply_inplace(
-                        gates_list[
-                            Int(indexes[layer * num_qubits + num_qubits + i])
-                        ].matrix,
-                        i,
-                        quantum_state_1,
-                        quantum_state_0,
-                        [[(i + 1) % num_qubits, 1]],
-                    )
-                    current_state = 0
+        for iteration in range(number_iterations):
+            for layer in range(number_layers):
+                for i in range(num_qubits):
+                    # NOTE Works but is slow with the dictionary
+                    # qubit_wise_multiply_inplace(
+                    #     gates_list[Int(indexes[layer * num_qubits + i])].matrix,
+                    #     i,
+                    #     quantum_states[current_state],
+                    #     quantum_states[1 - current_state],
+                    # )
+                    # NOTE: Fast but doesn't actually use the next state for new operations
+                    # qubit_wise_multiply_inplace(
+                    #     gates_list[Int(indexes[layer * num_qubits + i])].matrix,
+                    #     i,
+                    #     quantum_state_0,
+                    #     quantum_state_1,
+                    # )
+                    if current_state == 0:
+                        qubit_wise_multiply_inplace(
+                            gates_list[
+                                Int(indexes[layer * num_qubits + i])
+                            ].matrix,
+                            i,
+                            quantum_state_0,
+                            quantum_state_1,
+                        )
+                        current_state = 1
+                    else:
+                        qubit_wise_multiply_inplace(
+                            gates_list[
+                                Int(indexes[layer * num_qubits + i])
+                            ].matrix,
+                            i,
+                            quantum_state_1,
+                            quantum_state_0,
+                        )
+                        current_state = 0
+                # Compare with GPU which currently doesn't support controls qubits yet
+                # for i in range(num_qubits - 1):
+                #     # qubit_wise_multiply_inplace(
+                #     #     gates_list[
+                #     #         Int(indexes[layer * num_qubits + num_qubits + i])
+                #     #     ].matrix,
+                #     #     i,
+                #     #     quantum_states[current_state],
+                #     #     quantum_states[1 - current_state],
+                #     #     [[(i + 1) % num_qubits, 1]],
+                #     # )
+                #     # current_state = 1 - current_state
+                #     # qubit_wise_multiply_inplace(
+                #     #     gates_list[
+                #     #         Int(indexes[layer * num_qubits + num_qubits + i])
+                #     #     ].matrix,
+                #     #     i,
+                #     #     quantum_state_0,
+                #     #     quantum_state_1,
+                #     #     [[(i + 1) % num_qubits, 1]],
+                #     # )
+                #     if current_state == 0:
+                #         qubit_wise_multiply_inplace(
+                #             gates_list[
+                #                 Int(indexes[layer * num_qubits + num_qubits + i])
+                #             ].matrix,
+                #             i,
+                #             quantum_state_0,
+                #             quantum_state_1,
+                #             [[(i + 1) % num_qubits, 1]],
+                #         )
+                #         current_state = 1
+                #     else:
+                #         qubit_wise_multiply_inplace(
+                #             gates_list[
+                #                 Int(indexes[layer * num_qubits + num_qubits + i])
+                #             ].matrix,
+                #             i,
+                #             quantum_state_1,
+                #             quantum_state_0,
+                #             [[(i + 1) % num_qubits, 1]],
+                #         )
+                #         current_state = 0
 
     bench_ctx = DeviceContext()
     b.iter_custom[qubit_wise_multiply_inplace_workflow](bench_ctx)
@@ -369,6 +375,7 @@ def bench_qubit_wise_multiply_inplace[
     number_layers_step_size: Int = 200,
     fixed_number_qubits: Int = 5,
     fixed_number_layers: Int = 2,
+    fixed_number_iterations: Int = 1,
 ]():
     print("Running qubit_wise_multiply_inplace() Benchmarks...")
     print("-" * 80)
@@ -382,7 +389,7 @@ def bench_qubit_wise_multiply_inplace[
     ):
         bench.bench_function[
             benchmark_qubit_wise_multiply_inplace[
-                number_qubits, fixed_number_layers
+                number_qubits, fixed_number_layers, fixed_number_iterations
             ]
         ](
             BenchId(
