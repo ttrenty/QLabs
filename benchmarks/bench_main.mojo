@@ -16,7 +16,7 @@ def main():
     # bench_qubit_wise_multiply()
     bench_qubit_wise_multiply_inplace[
         min_number_qubits=1,
-        max_number_qubits=25,
+        max_number_qubits=17,
         number_qubits_step_size=1,
         min_number_layers=5,
         max_number_layers=3500,
@@ -32,7 +32,7 @@ def main():
     else:
         bench_qubit_wise_multiply_inplace_gpu[
             min_number_qubits=1,
-            max_number_qubits=30,  # 29 is OOM for my 3070 Ti Laptop GPU
+            max_number_qubits=23,  # 29 is OOM for my 3070 Ti Laptop GPU
             number_qubits_step_size=1,
             min_number_layers=5,
             max_number_layers=7000,
