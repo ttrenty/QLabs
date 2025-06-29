@@ -68,7 +68,7 @@ pixi run plot     # Run benchmarks and plot their results in data/
 from qlabs.base import StateVector, Hadamard, SWAP, NOT, PauliY, PauliZ
 from qlabs.abstractions import GateCircuit, StateVectorSimulator, ShowAfterEachGate
 
-num_qubits = 3
+alias num_qubits = 3
 qc = GateCircuit(num_qubits)
 
 qc.apply_gates(
@@ -92,10 +92,30 @@ print("Quantum circuit created:\n", qc)  # Visualization not fully implemented
 qsimu = StateVectorSimulator(
     qc,
     initial_state=StateVector.from_bitstring("0" * num_qubits),
-    use_gpu_if_available=True,  # GPU support not fully implemented
+    use_gpu_if_available=False,
     verbose=True,
     verbose_step_size=ShowAfterEachGate,  # Options: ShowAfterEachGate, ShowOnlyEnd
 )
+
+# GPU usage
+# The StateVectorSimulator currently does not support GPU with control gates fully.
+# The lower-level function `qubit_wise_multiply()` is correctly implemented for GPU.
+# qsimu = StateVectorSimulator[
+#     gpu_num_qubits=num_qubits,
+#     gpu_gate_ordered_set= [Hadamard, NOT, PauliY, PauliZ],
+#     gpu_control_gate_count=3,  # Planned to be automated
+#     gpu_control_bits_list= [
+#         [[2, 0]],
+#         [[1, 1]],
+#         [[0, 1]],
+#     ],  # Planned to be automated
+# ](
+#     qc,
+#     initial_state=StateVector.from_bitstring("0" * num_qubits),
+#     use_gpu_if_available=True,
+#     verbose=True,
+#     verbose_step_size=ShowOnlyEnd,
+# )
 
 final_state = qsimu.run()
 

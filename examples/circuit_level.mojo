@@ -56,26 +56,27 @@ fn simulate_figure1_circuit_abstract() -> None:
     # Create the initial state |000⟩
     initial_state: StateVector = StateVector.from_bitstring("000")
 
+    # Simulating using CPU
     qsimu = StateVectorSimulator(
         qc,
         initial_state=initial_state,
-        use_gpu_if_available=True,
+        use_gpu_if_available=False,
         verbose=True,
-        verbose_step_size=ShowOnlyEnd,  # ShowAfterEachGate, ShowAfterEachLayer
+        verbose_step_size=ShowOnlyEnd,  # or ShowAfterEachGate, ShowAfterEachLayer
     )
 
-    # # For GPU (NOTE: Doesn't work currently as GPU doesn't fully support control bits)
+    # # Simulating using GPU
     # qsimu = StateVectorSimulator[
     #     gpu_num_qubits=num_qubits,
     #     gpu_gate_ordered_set= [Hadamard, PauliZ, NOT],
     #     gpu_control_gate_count=2,
-    #     gpu_control_bits_list= [[[1, 1], [1, 1]]],
+    #     gpu_control_bits_list= [[[1, 1]], [[1, 1]]],
     # ](
     #     qc,
     #     initial_state=initial_state,
     #     use_gpu_if_available=True,
     #     verbose=True,
-    #     verbose_step_size=ShowOnlyEnd,  # ShowAfterEachGate, ShowAfterEachLayer
+    #     verbose_step_size=ShowOnlyEnd,
     # )
 
     state = qsimu.run()
@@ -122,7 +123,9 @@ fn simulate_figure4_circuit_abstract() -> None:
     print("Final quantum state:\n", final_state)
 
 
-fn simulate_random_circuit[number_qubits: Int](number_layers: Int) -> None:
+fn simulate_random_circuit[
+    number_qubits: Int, use_gpu: Bool = True
+](number_layers: Int) -> None:
     """Simulates a random quantum circuit with the specified number of qubits and layers.
 
     Parameters:
@@ -167,7 +170,7 @@ fn simulate_random_circuit[number_qubits: Int](number_layers: Int) -> None:
     ](
         qc,
         initial_state=quantum_state,
-        use_gpu_if_available=True,
+        use_gpu_if_available=use_gpu,
         verbose=False,
     )
 
