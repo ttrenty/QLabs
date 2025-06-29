@@ -62,9 +62,11 @@ ax1.plot(
     label="GPU",
 )
 ax1.set_title(
-    f"Execution Time vs. Number of Gates\n(Number of Layers x {layers_cpu_df['qubits'][0]} Qubits)"
+    f"Execution Time vs. Number of Layers\n({layers_cpu_df['qubits'][0]} Qubits)"
 )
-ax1.set_xlabel(f"Number of Gates")
+ax1.set_xlabel(
+    f"Number of Gates\n(Number of Layers x {layers_cpu_df['qubits'][0]} Qubits)"
+)
 ax1.set_ylabel("Mean Execution Time (ms)")
 ax1.legend()
 ax1.grid(True, linestyle="--", alpha=0.6)
@@ -85,7 +87,7 @@ ax2.plot(
     label="GPU",
 )
 ax2.set_title(
-    f"Execution Time vs. Number of Qubits ({qubits_cpu_df['layers'][0]} Layers)"
+    f"Execution Time vs. Number of Qubits\n({qubits_cpu_df['layers'][0]} Layers)"
 )
 ax2.set_xlabel("Number of Qubits")
 # We can make the y-axis a log scale if the values vary widely
