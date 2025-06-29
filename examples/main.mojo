@@ -46,7 +46,9 @@ def main():
 
     print("=========================================")
     print("circuit_level: simulate_random_circuit()")
-    simulate_random_circuit[number_qubits=20](number_layers=5)
+    simulate_random_circuit[number_qubits=20, use_gpu=True](
+        number_layers=5,
+    )
 
     print("=========================================")
     print("circuit_level: simulate_figure4_circuit_abstract()")
