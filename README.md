@@ -2,7 +2,6 @@
 
 **A Quantum Circuit Composer & Simulator in Mojo** 🔥⚛️
 
-
 ## Education 
 
 This project reimplements and extends the ideas from the following tutorial paper:

@@ -13,10 +13,6 @@ from .qubits_operations import partial_trace
 
 from layout import Layout, LayoutTensor
 
-alias dtype = DType.float32
-alias STATE_VECTOR_SIZE = 8
-alias state_vector_3qubits_layout = Layout.row_major(STATE_VECTOR_SIZE, 1)
-
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # MARK:         Structs              #
@@ -133,34 +129,6 @@ struct StateVector(Copyable, Movable, Stringable, Writable):
             1.0, 0.0
         )  # Set the amplitude for the state to 1
         return Self(num_qubits, state_vector)
-
-    # @staticmethod
-    # fn from_bitstring_gpu(
-    #     bitstring: String,    # GPU does not support String
-    #     quantum_state_re: LayoutTensor[
-    #         mut=True, dtype, state_vector_3qubits_layout
-    #     ],
-    #     quantum_state_im: LayoutTensor[
-    #         mut=True, dtype, state_vector_3qubits_layout
-    #     ],
-    # ) -> None:
-    #     """Fill the quantum state vector from the state of the given bitstring.
-
-    #     Params:
-    #         bitstring: A string of '0's and '1's representing the state, with
-    #                     the least significant qubit (top one) (LSB) at the start.
-    #         gate_re: Real part of the gate matrix, initialized to zeros.
-    #         gate_im: Imaginary part of the gate matrix, initialized to zeros.
-    #     """
-    #     # Put coefficent correspondin to the bitstring to 1
-    #     index: Int = 0
-    #     i: Int = 0
-    #     for bit in bitstring.codepoints():
-    #         if bit == Codepoint.ord("1"):
-    #             index |= 1 << i  # Set the bit at position i
-    #         i += 1
-
-    #     quantum_state_re[index, 0] = 1.0
 
     fn write_to[W: Writer](self, mut writer: W) -> None:
         writer.write(String(self))

@@ -244,7 +244,12 @@ fn benchmark_qubit_wise_multiply_inplace_gpu[
             for qubit in range(num_qubits):
                 if current_state == 0:
                     ctx.enqueue_function[
-                        qubit_wise_multiply_inplace_gpu[number_control_bits=0]
+                        qubit_wise_multiply_inplace_gpu[
+                            state_vector_size=state_vector_size,
+                            gate_set_size=gate_set_size,
+                            circuit_number_control_gates=circuit_number_control_gates,
+                            number_control_bits=0,
+                        ]
                     ](
                         gate_set_re_tensor,
                         gate_set_im_tensor,
@@ -259,7 +264,6 @@ fn benchmark_qubit_wise_multiply_inplace_gpu[
                         quantum_state_re_tensor,
                         quantum_state_im_tensor,
                         num_qubits,  # number_qubits
-                        state_vector_size,  # quantum_state_size
                         quantum_state_out_re_tensor,
                         quantum_state_out_im_tensor,
                         control_bits_circuit_tensor,
@@ -270,7 +274,12 @@ fn benchmark_qubit_wise_multiply_inplace_gpu[
                     current_state = 1
                 else:
                     ctx.enqueue_function[
-                        qubit_wise_multiply_inplace_gpu[number_control_bits=0]
+                        qubit_wise_multiply_inplace_gpu[
+                            state_vector_size=state_vector_size,
+                            gate_set_size=gate_set_size,
+                            circuit_number_control_gates=circuit_number_control_gates,
+                            number_control_bits=0,
+                        ]
                     ](
                         gate_set_re_tensor,
                         gate_set_im_tensor,
@@ -285,7 +294,6 @@ fn benchmark_qubit_wise_multiply_inplace_gpu[
                         quantum_state_out_re_tensor,
                         quantum_state_out_im_tensor,
                         num_qubits,  # number_qubits
-                        state_vector_size,  # quantum_state_size
                         quantum_state_re_tensor,
                         quantum_state_im_tensor,
                         control_bits_circuit_tensor,

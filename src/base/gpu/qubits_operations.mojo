@@ -5,54 +5,43 @@ from gpu.host import DeviceContext
 from layout import Layout, LayoutTensor
 
 alias dtype = DType.float32
-
 alias GATE_SIZE = 2
-alias STATE_VECTOR_SIZE = 8
 alias NUMBER_CONTROL_BITS = 1
-
-alias gate_1qubit_layout = Layout.row_major(GATE_SIZE, GATE_SIZE)
-alias state_vector_3qubits_layout = Layout.row_major(STATE_VECTOR_SIZE)
-alias control_bits_layout = Layout.row_major(NUMBER_CONTROL_BITS, 2)
-
-alias CIRCUIT_NUMBER_CONTROL_GATES = 2
-alias circuit_control_bits_layout = Layout.row_major(
-    CIRCUIT_NUMBER_CONTROL_GATES, NUMBER_CONTROL_BITS, 2
-)
-
-alias GATE_SET_SIZE = 3
-alias gate_set_1qubit_layout = Layout.row_major(
-    GATE_SET_SIZE, GATE_SIZE, GATE_SIZE
-)
-
-alias gate_set_1qubit_vectorized_layout = Layout.row_major(
-    GATE_SET_SIZE, GATE_SIZE, GATE_SIZE, 2
-)
 
 
 fn qubit_wise_multiply_inplace_gpu[
-    number_control_bits: Int, use_one_thread: Bool = False
+    state_vector_size: Int,
+    gate_set_size: Int,
+    circuit_number_control_gates: Int,
+    number_control_bits: Int,  # TODO allow more flexibility like with CPU
+    use_one_thread: Bool = False,
 ](
-    gate_set_re: LayoutTensor[mut=False, dtype, gate_set_1qubit_layout],
-    gate_set_im: LayoutTensor[mut=False, dtype, gate_set_1qubit_layout],
+    gate_set_re: LayoutTensor[
+        mut=False, dtype, Layout.row_major(gate_set_size, GATE_SIZE, GATE_SIZE)
+    ],
+    gate_set_im: LayoutTensor[
+        mut=False, dtype, Layout.row_major(gate_set_size, GATE_SIZE, GATE_SIZE)
+    ],
     gate_index: Int,
     gate_size: Int,
     target_qubit: Int,
     quantum_state_re: LayoutTensor[
-        mut=True, dtype, state_vector_3qubits_layout
+        mut=True, dtype, Layout.row_major(state_vector_size)
     ],
     quantum_state_im: LayoutTensor[
-        mut=True, dtype, state_vector_3qubits_layout
+        mut=True, dtype, Layout.row_major(state_vector_size)
     ],
     number_qubits: Int,
-    quantum_state_size: Int,
     quantum_state_out_re: LayoutTensor[
-        mut=True, dtype, state_vector_3qubits_layout
+        mut=True, dtype, Layout.row_major(state_vector_size)
     ],
     quantum_state_out_im: LayoutTensor[
-        mut=True, dtype, state_vector_3qubits_layout
+        mut=True, dtype, Layout.row_major(state_vector_size)
     ],
     control_bits_circuit: LayoutTensor[
-        mut=False, DType.int32, circuit_control_bits_layout
+        mut=False,
+        DType.int32,
+        Layout.row_major(circuit_number_control_gates, NUMBER_CONTROL_BITS, 2),
     ],
     current_control_gate_circuit: LayoutTensor[
         mut=True, DType.int32, Layout.row_major(1)
@@ -64,7 +53,10 @@ fn qubit_wise_multiply_inplace_gpu[
     qubits that the gate acts on are following the target qubit.
 
     Parameters:
-        number_control_bits: Number of control bits.
+        state_vector_size: Size of the quantum state vector (2^number_qubits).
+        gate_set_size: Size of the gate set (number of unique gates).
+        circuit_number_control_gates: Number of control gates in the circuit.
+        number_control_bits: Number of control bits for a control gate.
         use_one_thread: If True, only the first thread will perform the operation.
                     If False, all threads will participate in the operation.
 
@@ -77,7 +69,6 @@ fn qubit_wise_multiply_inplace_gpu[
         quantum_state_re: Real part of the quantum state vector.
         quantum_state_im: Imaginary part of the quantum state vector.
         number_qubits: Total number of qubits in the quantum state.
-        quantum_state_size: Size of the quantum state vector (2^number_qubits).
         quantum_state_out_re: Output real part of the quantum state vector after applying the gate.
         quantum_state_out_im: Output imaginary part of the quantum state vector after applying the gate.
         control_bits_circuit: Control bits, where each control bit contains
@@ -96,7 +87,7 @@ fn qubit_wise_multiply_inplace_gpu[
         if global_i > 0:
             return  # Skip this thread if it is not the first one
     else:
-        if global_i < quantum_state_size:
+        if global_i < state_vector_size:
             # Only threads whose index has a '0' at the target_qubit position will do the work.
             # These are the 'i1' indices.
             is_i1_thread = (global_i & size_of_half_block) == 0
@@ -151,19 +142,17 @@ fn qubit_wise_multiply_inplace_gpu[
     #     if flag == 1:
     #         desired_value_mask |= bit  # turn on the bit
 
-    size_of_state_vector: Int = quantum_state_size
-
     # copies all amplitudes from quantum_state to quantum_state_out
     @parameter
     if use_one_thread:
         # CPU like implementation
-        for i in range(size_of_state_vector):
+        for i in range(state_vector_size):
             quantum_state_out_re[i] = quantum_state_re[i]
             quantum_state_out_im[i] = quantum_state_im[i]
 
         target_qubits_count: Int = count_trailing_zeros(gate_size)
         size_of_block: Int = size_of_half_block << target_qubits_count
-        for block_start in range(0, size_of_state_vector, size_of_block):
+        for block_start in range(0, state_vector_size, size_of_block):
             for offset in range(size_of_half_block):
                 i1: Int = (
                     block_start | offset
@@ -206,7 +195,7 @@ fn qubit_wise_multiply_inplace_gpu[
     else:
         # GPU implementation
         # Parallel copy of the entire state vector
-        if global_i < size_of_state_vector:
+        if global_i < state_vector_size:
             quantum_state_out_re[global_i] = quantum_state_re[global_i]
             quantum_state_out_im[global_i] = quantum_state_im[global_i]
 
@@ -215,7 +204,7 @@ fn qubit_wise_multiply_inplace_gpu[
 
         # Each thread works on one index `global_i`.
         # We only need to proceed if the thread is within the state vector bounds.
-        if global_i < quantum_state_size:
+        if global_i < state_vector_size:
             # The core parallelization pattern:
             # Only threads whose index has a '0' at the target_qubit position will do the work.
             # We already know that these are the 'i1' indices.
