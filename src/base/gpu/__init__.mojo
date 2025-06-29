@@ -1,4 +1,3 @@
 from .qubits_operations import (
-    qubit_wise_multiply_gpu,
-    qubit_wise_multiply_gpu_2,
+    qubit_wise_multiply_inplace_gpu,
 )
