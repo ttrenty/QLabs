@@ -27,6 +27,7 @@ from circuit_level import (
 
 def main():
     print("QLabs: Quantum Circuit Composer & Simulator in Mojo")
+
     print("=========================================")
     print("low_level: simulate_figure1_circuit()")
     simulate_figure1_circuit()
@@ -45,7 +46,7 @@ def main():
 
     print("=========================================")
     print("circuit_level: simulate_random_circuit()")
-    simulate_random_circuit(number_qubits=10, number_layers=20)
+    simulate_random_circuit[number_qubits=20](number_layers=5)
 
     print("=========================================")
     print("circuit_level: simulate_figure4_circuit_abstract()")

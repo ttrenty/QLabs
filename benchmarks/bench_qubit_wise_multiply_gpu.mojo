@@ -38,7 +38,7 @@ alias NUMBER_CONTROL_BITS = 1
 @parameter
 @always_inline
 fn benchmark_qubit_wise_multiply_inplace_gpu[
-    num_qubits: Int, number_layers: Int
+    num_qubits: Int64, number_layers: Int, number_iterations: Int = 1
 ](mut b: Bencher) raises:
     # gates_list: List[Gate] = [Hadamard, PauliX, PauliY, PauliZ]
 
@@ -71,7 +71,7 @@ fn benchmark_qubit_wise_multiply_inplace_gpu[
             gate_set_size, GATE_SIZE, GATE_SIZE
         )
 
-        alias state_vector_size = 1 << num_qubits
+        alias state_vector_size = 1 << Int(num_qubits)
         alias state_vector_layout = Layout.row_major(state_vector_size)
 
         alias total_threads = state_vector_size
@@ -140,7 +140,7 @@ fn benchmark_qubit_wise_multiply_inplace_gpu[
 
         # -- Initialize the quantum circuit to the |000⟩ state -- #
         quantum_state: StateVector = StateVector.from_bitstring(
-            "0" * num_qubits
+            "0" * Int(num_qubits)
         )
         # print("Initial quantum state:\n", quantum_state)
 
@@ -240,68 +240,69 @@ fn benchmark_qubit_wise_multiply_inplace_gpu[
         # -- Apply circuit operations -- #
 
         current_state = 0
-        for layer in range(number_layers):
-            for qubit in range(num_qubits):
-                if current_state == 0:
-                    ctx.enqueue_function[
-                        qubit_wise_multiply_inplace_gpu[
-                            state_vector_size=state_vector_size,
-                            gate_set_size=gate_set_size,
-                            circuit_number_control_gates=circuit_number_control_gates,
-                            number_control_bits=0,
-                        ]
-                    ](
-                        gate_set_re_tensor,
-                        gate_set_im_tensor,
-                        gate_set_dic[Hadamard.symbol],
-                        # gate_set_dic[
-                        #     gates_list[
-                        #         Int(indexes[layer * num_qubits + qubit])
-                        #     ].symbol
-                        # ],
-                        GATE_SIZE,
-                        qubit,  # target_qubit
-                        quantum_state_re_tensor,
-                        quantum_state_im_tensor,
-                        num_qubits,  # number_qubits
-                        quantum_state_out_re_tensor,
-                        quantum_state_out_im_tensor,
-                        control_bits_circuit_tensor,
-                        current_control_gate_circuit_tensor,
-                        grid_dim=blocks_per_grid,
-                        block_dim=threads_per_block,
-                    )
-                    current_state = 1
-                else:
-                    ctx.enqueue_function[
-                        qubit_wise_multiply_inplace_gpu[
-                            state_vector_size=state_vector_size,
-                            gate_set_size=gate_set_size,
-                            circuit_number_control_gates=circuit_number_control_gates,
-                            number_control_bits=0,
-                        ]
-                    ](
-                        gate_set_re_tensor,
-                        gate_set_im_tensor,
-                        gate_set_dic[Hadamard.symbol],
-                        # gate_set_dic[
-                        #     gates_list[
-                        #         Int(indexes[layer * num_qubits + qubit])
-                        #     ].symbol
-                        # ],
-                        GATE_SIZE,
-                        qubit,  # target_qubit
-                        quantum_state_out_re_tensor,
-                        quantum_state_out_im_tensor,
-                        num_qubits,  # number_qubits
-                        quantum_state_re_tensor,
-                        quantum_state_im_tensor,
-                        control_bits_circuit_tensor,
-                        current_control_gate_circuit_tensor,
-                        grid_dim=blocks_per_grid,
-                        block_dim=threads_per_block,
-                    )
-                    current_state = 0
+        for iteration in range(number_iterations):
+            for layer in range(number_layers):
+                for qubit in range(Int(num_qubits)):
+                    if current_state == 0:
+                        ctx.enqueue_function[
+                            qubit_wise_multiply_inplace_gpu[
+                                state_vector_size=state_vector_size,
+                                gate_set_size=gate_set_size,
+                                circuit_number_control_gates=circuit_number_control_gates,
+                                number_control_bits=0,
+                            ]
+                        ](
+                            gate_set_re_tensor,
+                            gate_set_im_tensor,
+                            gate_set_dic[Hadamard.symbol],
+                            # gate_set_dic[
+                            #     gates_list[
+                            #         Int(indexes[layer * num_qubits + qubit])
+                            #     ].symbol
+                            # ],
+                            GATE_SIZE,
+                            qubit,  # target_qubit
+                            quantum_state_re_tensor,
+                            quantum_state_im_tensor,
+                            Int(num_qubits),  # number_qubits
+                            quantum_state_out_re_tensor,
+                            quantum_state_out_im_tensor,
+                            control_bits_circuit_tensor,
+                            current_control_gate_circuit_tensor,
+                            grid_dim=blocks_per_grid,
+                            block_dim=threads_per_block,
+                        )
+                        current_state = 1
+                    else:
+                        ctx.enqueue_function[
+                            qubit_wise_multiply_inplace_gpu[
+                                state_vector_size=state_vector_size,
+                                gate_set_size=gate_set_size,
+                                circuit_number_control_gates=circuit_number_control_gates,
+                                number_control_bits=0,
+                            ]
+                        ](
+                            gate_set_re_tensor,
+                            gate_set_im_tensor,
+                            gate_set_dic[Hadamard.symbol],
+                            # gate_set_dic[
+                            #     gates_list[
+                            #         Int(indexes[layer * num_qubits + qubit])
+                            #     ].symbol
+                            # ],
+                            GATE_SIZE,
+                            qubit,  # target_qubit
+                            quantum_state_out_re_tensor,
+                            quantum_state_out_im_tensor,
+                            Int(num_qubits),  # number_qubits
+                            quantum_state_re_tensor,
+                            quantum_state_im_tensor,
+                            control_bits_circuit_tensor,
+                            current_control_gate_circuit_tensor,
+                            grid_dim=blocks_per_grid,
+                            block_dim=threads_per_block,
+                        )
+                        current_state = 0
 
         keep(quantum_state_re.unsafe_ptr())
         keep(quantum_state_im.unsafe_ptr())
@@ -321,12 +322,13 @@ fn benchmark_qubit_wise_multiply_inplace_gpu[
 def bench_qubit_wise_multiply_inplace_gpu[
     min_number_qubits: Int = 15,
     max_number_qubits: Int = 25,
-    number_qubits_step_size: Int = 1,
+    number_qubits_step_size: Int64 = 1,
     min_number_layers: Int = 1,
     max_number_layers: Int = 2000,
     number_layers_step_size: Int = 200,
     fixed_number_qubits: Int = 5,
     fixed_number_layers: Int = 2,
+    fixed_number_iterations: Int = 1,
 ]():
     print("Running qubit_wise_multiply_inplace_gpu() Benchmarks...")
     print("-" * 80)
@@ -341,7 +343,7 @@ def bench_qubit_wise_multiply_inplace_gpu[
     ):
         bench.bench_function[
             benchmark_qubit_wise_multiply_inplace_gpu[
-                number_qubits, fixed_number_layers
+                number_qubits, fixed_number_layers, fixed_number_iterations
             ]
         ](
             BenchId(

@@ -41,7 +41,7 @@ fn simulate_figure1_circuit_abstract() -> None:
     """
     )
 
-    num_qubits: Int = 3
+    alias num_qubits: Int = 3
 
     qc: GateCircuit = GateCircuit(num_qubits)
 
@@ -59,9 +59,24 @@ fn simulate_figure1_circuit_abstract() -> None:
     qsimu = StateVectorSimulator(
         qc,
         initial_state=initial_state,
+        use_gpu_if_available=True,
         verbose=True,
-        verbose_step_size=ShowAfterEachGate,  # ShowAfterEachGate, ShowOnlyEnd
+        verbose_step_size=ShowOnlyEnd,  # ShowAfterEachGate, ShowAfterEachLayer
     )
+
+    # # For GPU (NOTE: Doesn't work currently as GPU doesn't fully support control bits)
+    # qsimu = StateVectorSimulator[
+    #     gpu_num_qubits=num_qubits,
+    #     gpu_gate_ordered_set= [Hadamard, PauliZ, NOT],
+    #     gpu_control_gate_count=2,
+    #     gpu_control_bits_list= [[[1, 1], [1, 1]]],
+    # ](
+    #     qc,
+    #     initial_state=initial_state,
+    #     use_gpu_if_available=True,
+    #     verbose=True,
+    #     verbose_step_size=ShowOnlyEnd,  # ShowAfterEachGate, ShowAfterEachLayer
+    # )
 
     state = qsimu.run()
 
@@ -107,85 +122,57 @@ fn simulate_figure4_circuit_abstract() -> None:
     print("Final quantum state:\n", final_state)
 
 
-fn simulate_random_circuit(number_qubits: Int, number_layers: Int) -> None:
+fn simulate_random_circuit[number_qubits: Int](number_layers: Int) -> None:
     """Simulates a random quantum circuit with the specified number of qubits and layers.
 
-    Args:
+    Parameters:
         number_qubits: The number of qubits in the circuit.
+
+    Args:
         number_layers: The number of layers in the circuit.
     """
 
+    alias gates_list: List[Gate] = [Hadamard, PauliX, PauliY, PauliZ]
+
     qc: GateCircuit = GateCircuit(number_qubits)
 
-    gates_list: List[Gate] = [Hadamard, PauliX, PauliY, PauliZ]
-
-    # index: UnsafePointer[Int8] = UnsafePointer[Int8].alloc(2*number_qubits)
-    # print("Creating random circuit...")
-    # random.seed()  # Seed on current time
-    # for _ in range(400):
-    #     random.randint(index, 2*number_qubits, 0, len(gates_list) - 1)
-    #     for i in range(number_qubits):
-    #         qc = qc.apply(gates_list[Int(index[i])], i)
-    #     qc = qc.barrier()
-    #     for i in range(number_qubits - 1):
-    #         qc = qc.apply(
-    #             gates_list[Int(index[number_qubits + i])],
-    #             i,
-    #             controls=[(i + 1) % number_qubits],
-    #             is_anti_control=[False],
-    #         )
-    #     qc = qc.barrier()
-
     print(
-        "Creating random circuit of",
+        "Creating random circuit with",
         number_qubits,
         "qubits and",
         number_layers,
-        "layers...",
+        "layers.",
     )
     index: UnsafePointer[Int8] = UnsafePointer[Int8].alloc(
         number_layers * 2 * number_qubits
     )
-    random.seed()  # Seed on current time
+    random.seed(42)
     random.randint(
-        index, number_layers * 2 * number_qubits, 0, len(gates_list) - 1
+        index, number_layers * 1 * number_qubits, 0, len(gates_list) - 1
     )
-    print("Random gates choices generated, applying them to the circuit...")
-    for iter in range(number_layers):
-        for i in range(number_qubits):
-            qc.apply(gates_list[Int(index[iter * number_qubits + i])](i))
-        qc.barrier()
-        for i in range(number_qubits - 1):
-            qc.apply(
-                gates_list[
-                    Int(index[iter * number_qubits + number_qubits + i])
-                ](i, controls=[(i + 1) % number_qubits]),
-            )
-        qc.barrier()
+    for layer in range(number_layers):
+        for qubit in range(number_qubits):
+            gate = gates_list[Int(index[layer * number_qubits + qubit])]
+            qc.apply(gate(qubit))
 
     print("Random circuit created has", qc.num_gates(), "total gates.")
 
-    # print(qc)
+    # Initial state |000...0⟩
+    quantum_state: StateVector = StateVector.from_bitstring("0" * number_qubits)
 
     print("Running Simulations...")
-    initial_state_bitstring: String = (
-        "0" * number_qubits
-    )  # Initial state |000...0⟩
-    initial_state: StateVector = StateVector.from_bitstring(
-        initial_state_bitstring
-    )
-
-    qsimu = StateVectorSimulator(
+    qsimu = StateVectorSimulator[
+        gpu_num_qubits=number_qubits,
+        gpu_gate_ordered_set=gates_list,
+    ](
         qc,
-        initial_state=initial_state,
+        initial_state=quantum_state,
+        use_gpu_if_available=True,
         verbose=False,
-        # verbose_step_size=ShowAfterEachLayer,  # ShowAfterEachGate, ShowOnlyEnd
-        verbose_step_size=ShowAfterEachGate,  # ShowAfterEachGate, ShowOnlyEnd
-        # stop_at=ShowAfterEachGate,  # ShowAfterEachGate, ShowOnlyEnd # TODO implement that instead of having access to manual methods
     )
 
-    for i in range(1000):
-        print("Iteration:", i, end="\r")
+    for i in range(20):
+        print("Simulating Circuit:", i, end="\r")
         _ = qsimu.run()
 
     print("")
