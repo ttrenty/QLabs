@@ -14,6 +14,9 @@ cuda-toolkit = "12.*" # for compute-sanitizer etc.
 [dependencies]
 modular = ">=25.5.0.dev2025062705,<26"
 max = ">=25.5.0.dev2025062405,<26"
+python = ">=3.11,<3.13"
+matplotlib = ">=3.10.3,<4"
+pandas = ">=2.3.0,<3"
 
 [environments]
 cuda = { features = ["cuda"] }
@@ -88,6 +91,7 @@ depends-on = ["install", "format_tests"]
 
 [tasks.bench] # Run all benchmarks
 cmd = "./build/all_benchmarks"
+inputs = ["benchmarks/**/*.mojo"]
 depends-on = [
     "install",
     "format_benchmarks",
@@ -97,6 +101,11 @@ depends-on = [
         "./benchmarks/**/*.mojo",
     ] },
 ]
+
+[tasks.plot] # Plot the results of the benchmarks
+cmd = "python3 benchmarks/plot_results.py"
+inputs = ["data/**/*.csv"]
+depends-on = ["install", "bench"]
 
 
 # # Benches

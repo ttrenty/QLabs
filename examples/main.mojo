@@ -41,7 +41,6 @@ from qlabs.abstractions import (
 
 from gpu_examples import (
     simulate_figure1_circuit_gpu,
-    simulate_any_size_circuit_gpu,
 )
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -642,7 +641,7 @@ def main():
 
     # simulate_figure1_circuit_abstract()
 
-    # simulate_random_circuit(number_qubits, number_layers)
+    simulate_random_circuit(number_qubits, number_layers)
 
     # simulate_figure4_circuit()
 
@@ -656,6 +655,4 @@ def main():
 
     # debug_something()
 
-    # simulate_figure1_circuit_gpu()
-
-    simulate_any_size_circuit_gpu[4]()
+    simulate_figure1_circuit_gpu[3]()

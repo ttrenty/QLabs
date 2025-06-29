@@ -8,7 +8,11 @@ from testing import (
 
 from testing_matrix import assert_matrix_almost_equal
 
-from testing_state_vector import assert_state_vector_almost_equal
+from testing_state_vector import (
+    assert_state_vector_almost_equal,
+    test_qubit_wise_multiply_0_reference,
+    test_qubit_wise_multiply_figure1_reference,
+)
 
 from math import sqrt
 
@@ -50,19 +54,7 @@ def test_qubit_wise_multiply_0():
 
     assert_state_vector_almost_equal(
         quantum_state,
-        StateVector(
-            3,
-            CustomList[ComplexFloat32, hint_trivial_type=True](
-                ComplexFloat32(0.5, 0),
-                ComplexFloat32(0, 0),
-                ComplexFloat32(0, 0),
-                ComplexFloat32(0.5, 0),
-                ComplexFloat32(0.5, 0),
-                ComplexFloat32(0, 0),
-                ComplexFloat32(0, 0),
-                ComplexFloat32(0.5, 0),
-            ),
-        ),
+        test_qubit_wise_multiply_0_reference,
     )
 
 
@@ -101,19 +93,7 @@ def test_qubit_wise_multiply_figure1():
 
     assert_state_vector_almost_equal(
         quantum_state,
-        StateVector(
-            3,
-            CustomList[ComplexFloat32, hint_trivial_type=True](
-                ComplexFloat32(0, 0),
-                ComplexFloat32(0, 0),
-                ComplexFloat32(0, 0),
-                ComplexFloat32(-1.0 / Float32(sqrt(2.0)), 0),
-                ComplexFloat32(1.0 / Float32(sqrt(2.0)), 0),
-                ComplexFloat32(0, 0),
-                ComplexFloat32(0, 0),
-                ComplexFloat32(0, 0),
-            ),
-        ),
+        test_qubit_wise_multiply_figure1_reference,
     )
 
 

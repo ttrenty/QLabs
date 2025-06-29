@@ -1,3 +1,5 @@
+from math import sqrt
+
 from testing import (
     assert_true,
     assert_false,
@@ -7,6 +9,37 @@ from testing import (
 )
 
 from qlabs.base import StateVector
+
+from qlabs.local_stdlib.complex import ComplexFloat32
+from qlabs.local_stdlib import CustomList
+
+alias test_qubit_wise_multiply_0_reference = StateVector(
+    3,
+    CustomList[ComplexFloat32, hint_trivial_type=True](
+        ComplexFloat32(0.5, 0),
+        ComplexFloat32(0, 0),
+        ComplexFloat32(0, 0),
+        ComplexFloat32(0.5, 0),
+        ComplexFloat32(0.5, 0),
+        ComplexFloat32(0, 0),
+        ComplexFloat32(0, 0),
+        ComplexFloat32(0.5, 0),
+    ),
+)
+
+alias test_qubit_wise_multiply_figure1_reference = StateVector(
+    3,
+    CustomList[ComplexFloat32, hint_trivial_type=True](
+        ComplexFloat32(0, 0),
+        ComplexFloat32(0, 0),
+        ComplexFloat32(0, 0),
+        ComplexFloat32(-1.0 / Float32(sqrt(2.0)), 0),
+        ComplexFloat32(1.0 / Float32(sqrt(2.0)), 0),
+        ComplexFloat32(0, 0),
+        ComplexFloat32(0, 0),
+        ComplexFloat32(0, 0),
+    ),
+)
 
 
 def assert_state_vector_almost_equal(
