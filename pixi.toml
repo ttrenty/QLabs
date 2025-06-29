@@ -62,7 +62,7 @@ outputs = ["build/qlabs.mojopkg"]
 depends-on = ["create_build_dir", "format_src"]
 
 [tasks.clean] # Clean the package files and Build directory
-cmd = "rm build/* && rmdir build/ && rm examples/qlabs.mojopkg && rm tests/qlabs.mojopkg && rm benchmarks/qlabs.mojopkg"
+cmd = "rm build/* && rmdir build/ && rm examples/qlabs.mojopkg && rm tests/qlabs.mojopkg && rm benchmarks/qlabs.mojopkg || true"
 
 [tasks.install] # Install the package in the necessary directories
 cmd = "cp build/qlabs.mojopkg examples/qlabs.mojopkg && cp build/qlabs.mojopkg tests/qlabs.mojopkg && cp build/qlabs.mojopkg benchmarks/qlabs.mojopkg"

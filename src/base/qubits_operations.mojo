@@ -320,6 +320,74 @@ fn qubit_wise_multiply(
     return new_state_vector
 
 
+fn qubit_wise_multiply_inplace(
+    gate: ComplexMatrix,
+    target_qubit: Int,
+    mut quantum_state_in: StateVector,
+    mut quantum_state_out: StateVector,
+    control_bits: List[List[Int]] = [],
+) -> None:
+    """Applies a quantum gate to specific qubits in the quantum state.
+
+    It will apply the gate starting from the target qubit assuming that the other
+    qubits that the gate acts on are following the target qubit.
+
+    Args:
+        gate: The 2x2 matrix representing the quantum gate.
+        target_qubit: The index of the qubit on which the gate is applied.
+        quantum_state_in: The current state of the quantum system.
+        quantum_state_out: The state vector to store the result of the gate application.
+        control_bits: A list of control bits, where each bit is represented as
+                    [wire_index, flag]. If flag is 1, it is a control bit; if 0,
+                    it is an anti-control bit.
+    """
+    gate_size: Int = gate.size()
+    target_qubits_count: Int = count_trailing_zeros(gate_size)
+    if (target_qubit < 0) or (target_qubit >= quantum_state_in.number_qubits()):
+        print(
+            "Error: target_qubit index out of bounds. Must be between 0 and",
+            quantum_state_in.number_qubits() - 1,
+        )
+        print("Skipping gate application.")
+        return
+
+    inclusion_mask: Int = 0
+    desired_value_mask: Int = 0
+    for control in control_bits:
+        wire_index, flag = control[0], control[1]
+        bit: Int = 1 << wire_index  # efficient way of computing 2^wire_index
+        inclusion_mask |= bit  # turn on the bit
+        if flag == 1:
+            desired_value_mask |= bit  # turn on the bit
+
+    size_of_state_vector: Int = quantum_state_in.size()
+    size_of_half_block: Int = 1 << target_qubit  # 2^target_qubit
+    size_of_block: Int = size_of_half_block << target_qubits_count
+    quantum_state_out = quantum_state_in
+
+    for block_start in range(0, size_of_state_vector, size_of_block):
+        for offset in range(size_of_half_block):
+            i1: Int = (
+                block_start | offset
+            )  # faster than, but equivalent to, block_start + offset
+
+            if (i1 & inclusion_mask) != desired_value_mask:
+                continue  # skip this iteration if the control bits do not match
+
+            i2: Int = (
+                i1 | size_of_half_block
+            )  # equivalent to i1 + size_of_half_block
+
+            quantum_state_out[i1] = (
+                gate[0, 0] * quantum_state_in[i1]
+                + gate[0, 1] * quantum_state_in[i2]
+            )
+            quantum_state_out[i2] = (
+                gate[1, 0] * quantum_state_in[i1]
+                + gate[1, 1] * quantum_state_in[i2]
+            )
+
+
 # fn invert_gate_endian() #TODO
 
 

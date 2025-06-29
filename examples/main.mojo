@@ -25,6 +25,7 @@ from qlabs.base import (
     SWAP,
     iSWAP,
     qubit_wise_multiply,
+    qubit_wise_multiply_inplace,
     qubit_wise_multiply_extended,
     apply_swap,
     partial_trace,
@@ -38,7 +39,10 @@ from qlabs.abstractions import (
     ShowOnlyEnd,
 )
 
-from gpu_examples import gpu_debug_something, run_gpu_not_abstract
+from gpu_examples import (
+    simulate_figure1_circuit_gpu,
+    simulate_any_size_circuit_gpu,
+)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # MARK:         Examples             #
@@ -98,6 +102,70 @@ fn simulate_figure1_circuit() -> None:
     )
 
     final_matrix = partial_trace(quantum_state, [])  # Trace out qubits
+
+    print("Final quantum state after tracing out qubits:\n", final_matrix)
+
+
+fn simulate_figure1_circuit_inplace() -> None:
+    """Simulates the circuit from Figure 1 in the paper."""
+    print("Simulating Figure 1 circuit.\nCircuit design:")
+    print(
+        """
+|0> -------|X|--|Z|--
+            |       
+|0> --|H|---*----*---
+                 |    
+|0> --|X|-------|X|--
+    """
+    )
+    # Initialize the quantum circuit to the |000⟩ state
+    quantum_state_0: StateVector = StateVector.from_bitstring("000")
+    quantum_state_1: StateVector = StateVector.from_bitstring("000")
+
+    print("Initial quantum state:\n", quantum_state_0)
+
+    # Gate 0
+    qubit_wise_multiply_inplace(
+        Hadamard.matrix, 1, quantum_state_0, quantum_state_1
+    )
+
+    print("After Hadamard gate on qubit 1:\n", quantum_state_1)
+
+    # Gate 1
+    qubit_wise_multiply_inplace(
+        PauliX.matrix, 2, quantum_state_1, quantum_state_0
+    )
+
+    print("After Pauli-X gate on qubit 2:\n", quantum_state_0)
+
+    # Gate 2
+    qubit_wise_multiply_inplace(
+        PauliX.matrix, 0, quantum_state_0, quantum_state_1, [[1, 1]]
+    )
+
+    print(
+        "After Pauli-X gate on qubit 0 with control on qubit 1:\n",
+        quantum_state_1,
+    )
+
+    # Gate 3
+    qubit_wise_multiply_inplace(
+        PauliZ.matrix, 0, quantum_state_1, quantum_state_0
+    )
+
+    print("After Pauli-Z gate on qubit 0:\n", quantum_state_0)
+
+    # Gate 4
+    qubit_wise_multiply_inplace(
+        PauliX.matrix, 2, quantum_state_0, quantum_state_1, [[1, 1]]
+    )
+
+    print(
+        "After Pauli-X gate on qubit 2 with control on qubit 1:\n",
+        quantum_state_1,
+    )
+
+    final_matrix = partial_trace(quantum_state_1, [])  # Trace out qubits
 
     print("Final quantum state after tracing out qubits:\n", final_matrix)
 
@@ -570,6 +638,8 @@ def main():
 
     simulate_figure1_circuit()
 
+    simulate_figure1_circuit_inplace()
+
     # simulate_figure1_circuit_abstract()
 
     # simulate_random_circuit(number_qubits, number_layers)
@@ -586,6 +656,6 @@ def main():
 
     # debug_something()
 
-    gpu_debug_something()
+    # simulate_figure1_circuit_gpu()
 
-    run_gpu_not_abstract()
+    simulate_any_size_circuit_gpu[4]()

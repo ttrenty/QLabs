@@ -18,6 +18,7 @@ from .gate import (
 
 from .qubits_operations import (
     qubit_wise_multiply,
+    qubit_wise_multiply_inplace,
     qubit_wise_multiply_extended,
     apply_swap,
     partial_trace,
