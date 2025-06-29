@@ -19,25 +19,25 @@ def main():
         max_number_qubits=25,
         number_qubits_step_size=2,
         min_number_layers=5,
-        max_number_layers=3000,
+        max_number_layers=4000,
         number_layers_step_size=400,
-        fixed_number_qubits=10,
-        fixed_number_layers=5,
+        fixed_number_qubits=11,
+        fixed_number_layers=50,
     ]()
 
     @parameter
     if not has_accelerator():
         print("No compatible GPU found")
     else:
-        bench_qubit_wise_multiply_inplace_gpu[
+        bench_qubit_wise_multiply_inplace[
             min_number_qubits=5,
             max_number_qubits=25,
             number_qubits_step_size=2,
             min_number_layers=5,
-            max_number_layers=3000,
+            max_number_layers=4000,
             number_layers_step_size=400,
-            fixed_number_qubits=10,
-            fixed_number_layers=5,
+            fixed_number_qubits=11,
+            fixed_number_layers=50,
         ]()
 
     # bench_qubit_wise_multiply_extended()

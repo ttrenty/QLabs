@@ -11,6 +11,9 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    env:
+      CONDA_OVERRIDE_CUDA: "12.0" # Mock CUDA version 12.0
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -20,7 +23,9 @@ jobs:
         with:
           pixi-version: latest
           cache: true
-          cache-key: ${{ runner.os }}-pixi-v1-${{ hashFiles('**/pixi.lock') }}
+          cache-key: ${{ runner.os }}-pixi-${{ hashFiles('**/pixi.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pixi-
 
       - name: Check formatting
         run: pixi run lint
@@ -33,4 +38,3 @@ jobs:
 
       - name: Run tests
         run: pixi run test
-
