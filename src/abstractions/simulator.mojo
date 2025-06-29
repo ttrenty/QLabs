@@ -125,6 +125,8 @@ struct StateVectorSimulator[
         self.verbose = verbose
         self.verbose_step_size = verbose_step_size
         if self.use_gpu_if_available:
+
+            @parameter
             if not has_accelerator():
                 print(
                     "No compatible GPU found. Falling back to CPU simulation."
@@ -282,13 +284,16 @@ struct StateVectorSimulator[
             print("Initial state:\n", self.initial_state)
 
         if self.use_gpu_if_available:
-            try:
-                ctx = DeviceContext()
-                final_state = self.run_gpu(ctx)
-                return final_state
-            except e:
-                print("Failed to create GPU context:", e)
-                print("Falling back to CPU simulation.")
+
+            @parameter
+            if has_accelerator():
+                try:
+                    ctx = DeviceContext()
+                    final_state = self.run_gpu(ctx)
+                    return final_state
+                except e:
+                    print("Failed to create GPU context:", e)
+                    print("Falling back to CPU simulation.")
 
         # Start with the initial state
         quantum_state: StateVector = self.initial_state
