@@ -4,39 +4,26 @@
 
 ### Implementations
 
-- 5 / 5 : Start adding support for GPU in the base classes if needed (not possible to use SIMD(ComplexFloat32) anymore, or keep them but seperate them when moving data to GPU)
-    - struct StateVector
-    - struct ComplexMatrix
-    - struct Gate
-
-- 5 / ? : GPU implementation of:
-    - qubit_wise_multiply()
+- 5 / 4 : GPU implementation of:
+    - qubit_wise_multiply() (with different type of control gates and for multiple qubits)
     - apply_swap()
     - partial_trace()
     - StateVector.to_density_matrix()
 
-- 4 / 3 : Export benchmark results as plots.
-
 - 2 / 4 : Efficient support for tracking a state statistic like entropy during the execution of the circuit by the simulator.
-
-- 3 / 3 : Implement naive implementation of the functions to compare performances
-    - matrix multiplication (but starting from right or smart)
-    - partial trace
 
 ### Tests
 
 - 5 / 2 : Test qubit_wise_multiply_extended() that can take multiple qubits gates (2 and more, iSWAP for example)
 
 - 5 / 2 : Test for everything that will be implement in GPU
-    - qubit_wise_multiply()
+    - qubit_wise_multiply() (with different type of control gates and for multiple qubits)
     - apply_swap()
-    - struct StateVector's methods
-    - struct ComplexMatrix's methods
-    - struct Gate's Gate
+    - partial_trace()
 
 ### Benchmarks
 
-- 3 / 2 : Reproduce table from page 10
+- 3 / 2 : partial_trace() Reproduce table from page 10
 
 ## Droped for now
 
@@ -60,3 +47,7 @@
 - 2 / 4 : qubit_wise_multiply_extended() but for gates applied to non-adjacent qubits
 
 - 2 / 3 : Implement concurence (2-qubits entanglement metric) computePairwiseQubitConcurrences()
+
+- 1 / 3 : Implement naive implementation of the functions to compare performances
+    - matrix multiplication (but starting from right or smart)
+    - partial trace

@@ -238,7 +238,12 @@ def simulate_figure1_circuit_gpu[num_qubits: Int]():
         #     Hadamard.matrix, 1, quantum_state
         # )
         ctx.enqueue_function[
-            qubit_wise_multiply_inplace_gpu[number_control_bits=0]
+            qubit_wise_multiply_inplace_gpu[
+                state_vector_size=state_vector_size,
+                gate_set_size=gate_set_size,
+                circuit_number_control_gates=circuit_number_control_gates,
+                number_control_bits=0,
+            ]
         ](
             gate_set_re_tensor,
             gate_set_im_tensor,
@@ -248,7 +253,6 @@ def simulate_figure1_circuit_gpu[num_qubits: Int]():
             quantum_state_re_tensor,
             quantum_state_im_tensor,
             num_qubits,  # number_qubits
-            state_vector_size,  # quantum_state_size
             quantum_state_out_re_tensor,
             quantum_state_out_im_tensor,
             control_bits_circuit_tensor,
@@ -269,7 +273,12 @@ def simulate_figure1_circuit_gpu[num_qubits: Int]():
         # Gate 1 (reverse the states input <-> output)
         # quantum_state = qubit_wise_multiply(PauliX.matrix, 2, quantum_state)
         ctx.enqueue_function[
-            qubit_wise_multiply_inplace_gpu[number_control_bits=0]
+            qubit_wise_multiply_inplace_gpu[
+                state_vector_size=state_vector_size,
+                gate_set_size=gate_set_size,
+                circuit_number_control_gates=circuit_number_control_gates,
+                number_control_bits=0,
+            ]
         ](
             gate_set_re_tensor,
             gate_set_im_tensor,
@@ -279,7 +288,6 @@ def simulate_figure1_circuit_gpu[num_qubits: Int]():
             quantum_state_out_re_tensor,
             quantum_state_out_im_tensor,
             num_qubits,  # number_qubits
-            state_vector_size,  # quantum_state_size
             quantum_state_re_tensor,
             quantum_state_im_tensor,
             control_bits_circuit_tensor,
@@ -302,7 +310,12 @@ def simulate_figure1_circuit_gpu[num_qubits: Int]():
         #     PauliX.matrix, 0, quantum_state, [[1, 1]]
         # )
         ctx.enqueue_function[
-            qubit_wise_multiply_inplace_gpu[number_control_bits=1]
+            qubit_wise_multiply_inplace_gpu[
+                state_vector_size=state_vector_size,
+                gate_set_size=gate_set_size,
+                circuit_number_control_gates=circuit_number_control_gates,
+                number_control_bits=1,
+            ]
         ](
             gate_set_re_tensor,
             gate_set_im_tensor,
@@ -312,7 +325,6 @@ def simulate_figure1_circuit_gpu[num_qubits: Int]():
             quantum_state_re_tensor,
             quantum_state_im_tensor,
             num_qubits,  # number_qubits
-            state_vector_size,  # quantum_state_size
             quantum_state_out_re_tensor,
             quantum_state_out_im_tensor,
             control_bits_circuit_tensor,
@@ -333,7 +345,12 @@ def simulate_figure1_circuit_gpu[num_qubits: Int]():
         # Gate 3
         # quantum_state = qubit_wise_multiply(PauliZ.matrix, 0, quantum_state)
         ctx.enqueue_function[
-            qubit_wise_multiply_inplace_gpu[number_control_bits=0]
+            qubit_wise_multiply_inplace_gpu[
+                state_vector_size=state_vector_size,
+                gate_set_size=gate_set_size,
+                circuit_number_control_gates=circuit_number_control_gates,
+                number_control_bits=0,
+            ]
         ](
             gate_set_re_tensor,
             gate_set_im_tensor,
@@ -343,7 +360,6 @@ def simulate_figure1_circuit_gpu[num_qubits: Int]():
             quantum_state_out_re_tensor,
             quantum_state_out_im_tensor,
             num_qubits,  # number_qubits
-            state_vector_size,  # quantum_state_size
             quantum_state_re_tensor,
             quantum_state_im_tensor,
             control_bits_circuit_tensor,
@@ -365,7 +381,12 @@ def simulate_figure1_circuit_gpu[num_qubits: Int]():
         #     PauliX.matrix, 2, quantum_state, [[1, 1]]
         # )
         ctx.enqueue_function[
-            qubit_wise_multiply_inplace_gpu[number_control_bits=1]
+            qubit_wise_multiply_inplace_gpu[
+                state_vector_size=state_vector_size,
+                gate_set_size=gate_set_size,
+                circuit_number_control_gates=circuit_number_control_gates,
+                number_control_bits=1,
+            ]
         ](
             gate_set_re_tensor,
             gate_set_im_tensor,
@@ -375,7 +396,6 @@ def simulate_figure1_circuit_gpu[num_qubits: Int]():
             quantum_state_re_tensor,
             quantum_state_im_tensor,
             num_qubits,  # number_qubits
-            state_vector_size,  # quantum_state_size
             quantum_state_out_re_tensor,
             quantum_state_out_im_tensor,
             control_bits_circuit_tensor,

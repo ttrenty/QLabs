@@ -39,7 +39,6 @@ qubits_gpu_df = process_benchmark_data(
 layers_cpu_df = process_benchmark_data("data/qubit_wise_multiply_inplace_layers.csv")
 qubits_cpu_df = process_benchmark_data("data/qubit_wise_multiply_inplace_qubits.csv")
 
-
 # --- 3. Plotting ---
 
 # Create a figure with two subplots side-by-side
@@ -48,21 +47,24 @@ fig.suptitle("Qubit-wise Multiplication Benchmark", fontsize=16)
 
 # Plot 1: Performance vs. Number of Layers
 ax1.plot(
-    layers_cpu_df["layers"],
+    layers_cpu_df["layers"] * layers_cpu_df["qubits"][0],
     layers_cpu_df["time_ms"],
     marker="o",
     linestyle="-",
     label="CPU",
 )
 ax1.plot(
-    layers_gpu_df["layers"],
+    layers_gpu_df["layers"]
+    * layers_cpu_df["qubits"][0],  # Scale x-axis by number of qubits
     layers_gpu_df["time_ms"],
     marker="s",
     linestyle="--",
     label="GPU",
 )
-ax1.set_title("Performance vs. Number of Layers (13 Qubits)")
-ax1.set_xlabel("Number of Layers")
+ax1.set_title(
+    f"Execution Time vs. Number of Gates\n(Number of Layers x {layers_cpu_df['qubits'][0]} Qubits)"
+)
+ax1.set_xlabel(f"Number of Gates")
 ax1.set_ylabel("Mean Execution Time (ms)")
 ax1.legend()
 ax1.grid(True, linestyle="--", alpha=0.6)
@@ -82,13 +84,21 @@ ax2.plot(
     linestyle="--",
     label="GPU",
 )
-ax2.set_title("Performance vs. Number of Qubits (20 Layers)")
+ax2.set_title(
+    f"Execution Time vs. Number of Qubits ({qubits_cpu_df['layers'][0]} Layers)"
+)
 ax2.set_xlabel("Number of Qubits")
 # We can make the y-axis a log scale if the values vary widely
 ax2.set_ylabel("Mean Execution Time (ms) - Log Scale")
 ax2.set_yscale("log")  # Use a logarithmic scale to better see the differences
 ax2.legend()
 ax2.grid(True, which="both", linestyle="--", alpha=0.6)
+# set the x-ticks to be the x-values of the qubits
+unique_cpu_qubits = qubits_cpu_df["qubits"].unique()
+unique_gpu_qubits = qubits_gpu_df["qubits"].unique()
+unique_qubits = sorted(set(unique_cpu_qubits) | set(unique_gpu_qubits))
+ax2.set_xticks(unique_qubits)
+ax2.set_xticklabels(unique_qubits, rotation=45)
 
 
 # Adjust layout to prevent labels from overlapping

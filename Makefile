@@ -2,9 +2,9 @@
 
 .PHONY: all
 all:
-	# @pixi run test
 	@pixi run main
-	@pixi run bench
+	@pixi run test
+	# @pixi run bench
 
 .PHONY: %
 %:
