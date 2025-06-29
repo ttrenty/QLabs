@@ -22,7 +22,7 @@ def main():
         max_number_layers=4000,
         number_layers_step_size=400,
         fixed_number_qubits=11,
-        fixed_number_layers=50,
+        fixed_number_layers=20,
     ]()
 
     @parameter
@@ -37,7 +37,7 @@ def main():
             max_number_layers=4000,
             number_layers_step_size=400,
             fixed_number_qubits=11,
-            fixed_number_layers=50,
+            fixed_number_layers=20,
         ]()
 
     # bench_qubit_wise_multiply_extended()
