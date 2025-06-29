@@ -44,6 +44,14 @@ inputs = ["./tests/**/*.mojo"]
 cmd = "pixi run mojo format ./benchmarks"
 inputs = ["./benchmarks/**/*.mojo"]
 
+[tasks.format]
+depends-on = [
+    "format_examples",
+    "format_src",
+    "format_tests",
+    "format_benchmarks",
+] # Format all the code
+
 [tasks.create_build_dir]
 cmd = "mkdir -p build/"
 

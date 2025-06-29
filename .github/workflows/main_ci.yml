@@ -24,8 +24,6 @@ jobs:
           pixi-version: latest
           cache: true
           cache-key: ${{ runner.os }}-pixi-${{ hashFiles('**/pixi.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pixi-
 
       - name: Check formatting
         run: pixi run lint
