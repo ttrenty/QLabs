@@ -1,7 +1,6 @@
 from bit import count_trailing_zeros
 
 from gpu import thread_idx, block_dim, block_idx, global_idx, barrier
-from gpu.host import DeviceContext
 from layout import Layout, LayoutTensor
 
 alias dtype = DType.float32
@@ -262,7 +261,7 @@ fn qubit_wise_multiply_inplace_gpu[
             # If control bits do not match, we do nothing. The values already
             # copied to quantum_state_out are correct.
 
-    # Parallel Gate Application
+    # Using more threads per elements, one for real, one for imaginary part
     # target_qubits_count: Int = count_trailing_zeros(gate_size)
     # size_of_half_block: Int = 1 << target_qubit
 

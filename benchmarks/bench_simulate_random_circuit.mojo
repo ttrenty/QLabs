@@ -100,7 +100,6 @@ fn simulate_random_circuit[num_qubits: Int, number_layers: Int]() -> None:
     qsimu = StateVectorSimulator(
         qc,
         initial_state=initial_state,
-        optimisation_level=0,  # No optimisations for now
         verbose=False,
         # verbose_step_size=ShowAfterEachLayer,  # ShowAfterEachGate, ShowOnlyEnd
         verbose_step_size=ShowAfterEachGate,  # ShowAfterEachGate, ShowOnlyEnd

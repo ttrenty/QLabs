@@ -44,8 +44,8 @@ struct StateVectorSimulator(Copyable, Movable):
     """The initial state of the quantum system before any gates are applied."""
     var original_initial_state: StateVector
     """The original initial state before any modifications, used for resetting the simulator."""
-    var optimisation_level: Int
-    """The level of optimisation to apply during simulation, affecting performance and accuracy."""
+    var use_gpu_if_available: Bool
+    """Whether to use GPU acceleration if available (not implemented yet)."""
     var verbose: Bool
     """Whether to print verbose output during simulation steps."""
     var verbose_step_size: String
@@ -58,7 +58,7 @@ struct StateVectorSimulator(Copyable, Movable):
         # initial_state: Optional[StateVector] = None, # TODO ask how to use that with return of next_layer()
         # initial_state: __type_of(Self.initial_state), # doesn't work
         initial_state: StateVector,
-        optimisation_level: Int = 0,
+        use_gpu_if_available: Bool = False,
         verbose: Bool = False,
         verbose_step_size: String = "ShowOnlyEnd",
     ):
@@ -67,7 +67,7 @@ struct StateVectorSimulator(Copyable, Movable):
         Args:
             circuit: The quantum circuit containing the gates to be applied.
             initial_state: The initial state of the quantum system.
-            optimisation_level: The level of optimisation to apply during simulation.
+            use_gpu_if_available: Whether to use GPU acceleration if available (not implemented yet).
             verbose: Whether to print verbose output during simulation steps.
             verbose_step_size: The verbosity level for simulation output.
         """
@@ -77,7 +77,7 @@ struct StateVectorSimulator(Copyable, Movable):
         self.original_circuit = circuit
         self.initial_state = new_initial_state
         self.original_initial_state = new_initial_state
-        self.optimisation_level = optimisation_level
+        self.use_gpu_if_available = use_gpu_if_available
         self.verbose = verbose
         self.verbose_step_size = verbose_step_size
 
@@ -176,7 +176,7 @@ struct StateVectorSimulator(Copyable, Movable):
             Self(
                 circuit,
                 new_quantum_state,
-                self.optimisation_level,
+                self.use_gpu_if_available,
                 self.verbose,
                 self.verbose_step_size,
             ),
